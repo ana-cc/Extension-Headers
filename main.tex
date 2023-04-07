@@ -1,0 +1,510 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{fancyhdr}\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{multirow}
+
+\usepackage{lastpage}
+ \usepackage{draftwatermark}
+\SetWatermarkText{UoA}
+\SetWatermarkScale{3}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rfoot{Page \thepage \hspace{1pt} of \pageref{LastPage}} 
+
+\title{Is it possible to extend IPv6?}
+\date{December 2022}
+
+\author{\IEEEauthorblockN{Ana Custura}
+\IEEEauthorblockA{
+\textit{University of Aberdeen}\\
+}
+\and
+\IEEEauthorblockN{Raffaello Secchi}
+\textit{University of Aberdeen}\\
+\and
+\IEEEauthorblockN{Gorry Fairhurst}
+\textit{University of Aberdeen}\\
+}
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The Hop-by-Hop Options and Destination Options Extension Headers have historically faced challenges in deployment due to the lack of support in hardware-based forwarding and concerns around potential denial-of-service attacks. However, there has been a renewed interest within the standards community both in simplifying their processing, and in using them for new applications. 
+Through a wide-scale measurement campaign, we show that many Autonomous Systems (ASes) in access networks and core of the Internet permit the traversal of EHs carrying options, and that path traversal is highly variable depending on the type of network, size of option and transport protocol used, but not on the type of option sent. We also show that packets with Extension Headers can impact load balancing network functions, and present evidence of equipment misconfiguration. Finally we outline the remaining deployment challenges for the EHs and provide recommendations for utilizing them.
+
+\end{abstract}
+
+\begin{IEEEkeywords}
+IPv6 Options, Destination Options, Hop-by-Hop Options, IP protocol
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:introduction}
+
+  
+From the start, IPv6~\cite{RFC8200} was designed to be extensible using Extension Headers (EHs), which include additional information beyond the base IPv6 header with the aim of enabling novel network functionality and features.
+
+However, EHs are positioned between the IPv6 base header and the upper layer protocol transported in a packet. This can increase the processing requirements for IPv6 routing equipment and devices that perform functions based on upper layer header information (like transport protocol or destination port). %as they need to scan deeper into a packet to find this. %This also has potential security implications.
+Due to implementation errors, hardware limitations and explicit or implicit configuration, many such devices can drop packets with IPv6 EHs~\cite{rfc9098}. Since IPv6 was standardised by the Internet Engineering Task Force (IETF), several distinct informal measurements within the IETF have reported,  with conflicting results, that packets with EHs are often dropped before reaching their destination~\cite{RFC7872} \cite{apnic} \cite{nalini-iepg114} \cite{james}.
+
+In this paper, we argue that this variance in whether a packet is transmitted to its destination on a given Internet path (path traversal) stems from how and where the measurements were performed, and present a new set of comprehensive wide-scale measurements of Hop-by-Hop Options and Destination Options EH packets across consumer edge, server edge and Internet core paths. We show that their traversal depends on the Internet path. This in-depth traversal survey is accompanied by an analysis of where packets with these EHs are dropped and the remaining challenges in their deployment. Finally, we derive a set of recommendations for network operators, hardware implementors and protocol developers interested in using the Hop-by-Hop Options and Destination Options EHs.
+
+This work is motivated by an increasing interest within the standards community in using these EHs for sending larger packets~\cite{rfc9268} and monitoring network performance~\cite{rfc8250}~\cite{ietf-ippm-ioam-ipv6-options-10}.
+
+Section~\ref{sec:background} presents the historical challenges in deployment of IPv6 EHs and explains their structure and use. The motivation for this work and all existing measurements both within and outside of the academic literature space are presented in Section~\ref{sec:motivation}.
+Sections~\ref{sec:methodology}-\ref{sec:pathspider-results} present the methodology and results of this study, split by type of network paths analysed.
+The implications of our results for emerging EH standards are discussed in Section~\ref{sec:discussion}. Our findings are summarised in the conclusion.
+
+\section{Backgroud}
+\label{sec:background}
+
+\label{sec:ipv6-option-deployment}
+The original IPv6 standard~\cite{rfc2460} defines the IPv6 header structure to be extensible, containing a mandatory fixed-length IPv6 header, which can be followed by one or more optional extension headers. The standard also describes the  Hop-by-hop Options (HbH Opts), Routing, Fragment and Destination Options (Dest Opts) EHs.
+
+The Routing EH was intended to specify a sequence of intermediate network devices that a packet must traverse on its way to the destination. The Fragment EH was introduced to allow IPv6 packet fragmentation. 
+HbH Opts EHs carry information intended to be processed by all devices along the path, while Dest Opts EHs carry options to be processed at the final destination device.
+
+Multiple EHs can be added to an IPv6 packet, with the requirement that the length of a full IPv6 header is contained within the first fragment of a packet~\cite{RFC8200}. As such, the IPv6 header is both larger and more complex compared to IPv4, increasing the processing requirements of both hardware and software.
+
+The parsing of IPv6 packets with EHs depends on a device implementation and architecture. In the early Internet, packet routers were implemented entirely in software, and as the Internet grew packet processing was moved from software to Application Specific Integrated Circuits (ASICs), while the control functions remained~\cite{router-architecture}. Routers started having a split architecture with a control and forwarding plane~\cite{RFC3654}, corresponding to router-critical operations running in software and hardware processing respectively. In this architecture, incoming packets can be processed on the ``fast path" in the forwarding plane on an ASIC or sent for processing over an internal link on the ``slow path", or the control plane of a router. As IPv6 emerged, ASIC support for it was limited, and IPv6 deployment itself was in its infancy - and many network device architectures processed packets containing IPv6 EHs on the slow path~\cite{ietf-v6ops-hbh-03}.
+This resulted in opening these routers up to DoS attacks~\cite{naagas2021deh}, because clients sending a large amount of IPv6 traffic with EHs could affect a router's control plane functions where no rate-limiting of such packets was available. This steered network operators to configure their devices to discard packets containing EHs, in particular the HbH Opts EH, which the authors of~\cite{ietf-v6ops-hbh-03} argue has in turn led the standards community to stop defining new HbH Opts~\cite{ietf-v6ops-hbh-03}.
+
+However, since its standardisation in the late nineties, the IPv6 protocol has seen widespread adoption~\cite{v6adoption_ton} and the hardware and software to support it have matured: packet lookup capacity in routers is increasing and router architectures have evolved, with solutions based on re-configurable logic circuits that allow specific and dedicated functions now emerging~\cite{cisco-silicon-one}.
+
+Updates have also been made to the IPv6 standard itself based on this operational experience~\cite{RFC5722}~\cite{RFC6734}~\cite{RFC6564}~\cite{RFC8200}. These improvements continue as EH processing has become a recent focus in the standards community, aiming to motivate a change in both network operator policies and the implementation of more resilient router architectures that facilitate EH processing~\cite{ietf-6man-hbh-processing-06, ietf-v6ops-hbh-03, ietf-6man-eh-limits-02}.
+The rest of this section describes the HbH and Dest Opts EHs, and outlines some operational considerations for their use.
+
+%https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7949061
+
+\subsection{Hop-by-Hop and Destination Option EHs}
+
+An IPv6 packet can contain zero or more EHs, each identified by its own number in the Next Header field in the preceding header. The HbH Opts header is indicated by the value 0, while the assigned protocol number for the Dest Opts header is 60. Both HbH and Dest Opts can be included in the same IPv6 packet in different EHs. An EH can contain multiple Options - Figure~\ref{fig:eh-format} presents one EH with 2 Options.
+
+\begin{figure}
+\centering
+  \includegraphics[width=0.5\textwidth]{ehformat.png}
+  \caption{Format of an IPv6 packet carrying one EH with two options. In the figure, the HbH or Dest Opts EH can be specified in Next Header field of the base IPv6 header.}
+  \label{fig:eh-format}
+\end{figure}
+
+Dest Opts are not processed until the packet reaches its destination. The HbH Opts header can be examined or processed by any network device along a path until the packet reaches its destination. Although intended to be processed differently, HbH and Dest Opts EHs carry a variable number of Options that share the same Type-Length-Value (TLV) encoding~\cite{RFC8200}. Option Type and Length are each encoded within one Byte, followed by a variable-size Option Value field that carries the option data. Figure~\ref{fig:eh-format} shows this format. The total EH length is 8-byte aligned and specified in the EH Length field, while each individual option declares its own length in the Option Length field. Standardized option types are presented in Table~\ref{tbl:options}.
+
+The Option Type field further encodes meaning in its two highest order bits, which determine how a network device should process packets with an Option unknown to that device. If the bits are 00, the processing device should skip over the option and continue processing the header. If the bits are 01, the packet should be discarded. If the bits are 10, the packet should be discarded and an ICMP Parameter Problem, Code 2, message should be sent back to the sender, pointing to the unrecognized Option Type. Finally, where the bits are 11 - perform the same actions as for bytes 10, but only return a message to the sender if the destination address of the original packet was not a multicast address. 
+Among these, the most common choice across all existing standardised options is setting the bits to 00 (see Table~\ref{tbl:options}).
+One additional high-order bit of the Option Type field specifies whether or not the Option Data of that option can change en route to the packet's final destination.
+% Please add the following required packages to your document preamble:
+
+
+Because they can be modified individually by network devices on a path, packets with HbH Opts have measurement applications within a network domain. They can be used in place of traditional mechanisms for measurement that rely on ICMP: Option 0x30 has been defined as alternative to PMTUD~\cite{rfc9268}, option 0x12 has been specified to measure packet loss, latency, and jitter on live traffic measurements~\cite{rfc9343} and recently-proposed option 0x31 records operational and telemetry information that can be updated by devices on the path between two endpoints. Dest Opts can provide some similar functionality between endpoints - option 0x0F~\cite{rfc8250} can be used to measure performance and diagnostic metrics like round-trip delay.
+Other applications for packets with HbH Opts include improving the reliability of packet forwarding in lossy networks.
+
+Originally all devices on a path were required to examine and process the HbH Opts header~\cite{rfc2460}. This requirement was updated by~\cite{RFC8200} to only apply to devices that have been explicitly configured to process it. If present, the HbH Opts header must immediately follow the IPv6 header. 
+
+\subsection{Operational considerations}
+
+Some network devices need to identify the upper-layer protocol header. This requires parsing the entire IPv6 header chain from the mandatory IPv6 header to the last extension header. These devices are common in the network domain edge, and include routers implementing Access Control Lists (ACLs) or Equal Cost Multipath Routing (ECMP), and equipment that performs functions such as application load balancing, Multifield (MF) classification, deep packet inspection (DPI) or Denial of Service (DoS) attack mitigation.
+
+On the other hand, network equipment that operates in the Internet core does not require any flow information. RFC 9288~\cite{rfc9288} produced a set of recommendations for transit routers. For HbH Opts, the recommendation is to allow the forwarding of packets where they can be forwarded on the fast path, or where on the slow path as long as rate-limiting is available. For network devices that can only process these in the slow path without any mitigation options available, the recommendation is to discard packets containing these headers. The document recommends permitting packets with the Dest Opts EH.
+
+
+
+%Because network designers stopped defining new HBH Options, the community was not motivated to fix the implementation problem that caused use of a HBH Option Header to become a DoS vector.
+    
+
+\section{State of the art and motivation}
+\label{sec:motivation}
+
+The IETF debate on path traversal for packets with EHs is not new - in 2015, an IETF Informational document presenting active traceroute measurements to servers within the Alexa top 1M domains~\cite{RFC7872} finds different EHs are often dropped in transit networks.
+Since the publication of this document, several measurements~\cite{james}~\cite{nalini-iepg114}~\cite{apnic}, have been informally presented within the IETF to support standardisation efforts or to measure the adoption of emerging standards around IPv6 Extension Headers. Although all measurements point out issues with the path traversal of various EHs, the amount and nature of the brokenness reported varies.
+
+This has also sparked renewed efforts both around EH measurement and methodology~\cite{james}~\cite{elkins-v6ops-eh-deepdive-fw-01}.
+An IETF draft aiming to put forward a methodology for isolating the reasons and network devices responsible for IPv6 Extension Headers drops~\cite{elkins-v6ops-eh-deepdive-fw-01} discusses cases where a tested server is behind a Content Delivery Network. Although no measurements are presented in the document, the authors reported separately within the IETF on a successful experiment that used packets with Dest Opts to perform file transfers using the File Transfer Protocol (FTP) between 6 vantage points~\cite{nalini-iepg114}.
+
+Another emerging IETF draft, Just Another Measurement of Extension header Survivability (JAMES)~\cite{james}, presents EH traversal results from traceroute measurements performed in a mesh between 21 vantage points located in distinct Autonomous Systems (ASes). This study aims to test all specified IPv6 EHs (including Routing, Fragment etc.) in an environment where both source and destination are under the control of the researcher, with the aim of understanding traversal in the Internet core, and has been featured in~\cite{james-imc}. The study records an 8-9\% path traversal for 8 Byte HbH Opts EHs, and a 97\% traversal for 8 Byte Dest Opts EHs, with traversal diminishing as the size of the EH increases. We note that 6 of the total of 21 vantage points are hosted by a cloud provider that does not permit HbH Optsthrough their network - Digital Ocean.
+
+Another measurement which contributed to IETF discussion, but not related to any IETF document, was performed by APNIC~\cite{apnic}, and looks at end-to-end Fragmentation, HbH, and Dest Opts EHs. This study has a unique methodology - it initiates connections from clients using a crowd-sourced approach and then measures end-to-end support by introducing packets with an EH towards the client. APNIC report 4M different measurements per day, spanning a large proportion of the IPv6 client base. All measurements are performed from servers in the same cloud provider (Linode - AS63949), which we further discuss in Section~\ref{sec:discussion}. The findings show a path traversal rate of less than 50\% for Dest Opts and close to 0 for HbH Opts.
+
+The different results outlined above present conflicting views, representative of the complex nature of Internet paths. We argue the differences are explained by examining the types of networks measured and the choice of vantage points and destinations. To fully explore the various aspects of EH traversal, our work takes a large-scale measurement approach, testing a wide range of access, core and server edge networks, and focuses on the HbH and Dest Opts EH types. In Section~\ref{sec:discussion}, our results from measurements in access networks are compared and discussed alongside their closest counterpart - the measurements presented in JAMES~\cite{james}. As we also test edge paths to target servers based on top 1M domains lists, we refresh the data presented in~\cite{RFC7872} for a longitudinal view.
+
+ A large-scale passive measurement study of EHs~\cite{passive-threats} exists, and has analysed IPv6 traffic to and from the Czech Republic national research and education network over the period of a month in 2016. On this network, they found 0.1\% of IPv6 flows contained an EH, out of which 40.9\% were HbH Opts packets carrying ICMPv6 payloads, primarily multicast (although not specified by the original authors, we note this to be Multicast for Low-Power and Lossy Networks~\cite{RFC7731}). The study notes that dropping ICMPv6 traffic containing EHs could result in loss of essential network control information. 
+
+With the exception of~\cite{james-imc}, there are no other peer-reviewed active measurement studies. To the authors' best knowledge, this work is the first large-scale measurement study that looks at not only end-to-end support in servers, but also path analysis and longitudinal changes for HbH and Dest Opts EHs.
+
+\section{Methodology} 
+\label{sec:methodology}
+
+This paper employs a combination of tools and experiments to delve into various aspects of HbH and Dest Opts traversal. Table~\ref{tbl:datasets} presents the purpose and name of each resulting dataset, alongside the time periods each measurement was ran and the transport protocols that it used.
+
+\begin{table}[h]
+\begin{tabular}{p{0.17\textwidth}|p{0.075\textwidth}|p{0.03\textwidth}|p{0.065\textwidth}|p{0.03\textwidth}}
+Purpose                                                                          & Tool Used        & Name & Date               & Trans. \\
+\hline
+Explore traversal of 8B Opts in access networks                                  & Traceroute       & R1           & Oct 2022- Jan 2023 & UDP TCP          \\
+\hline
+Explore traversal and EH size in access networks                                & Traceroute       & R2           & Oct 2022           & UDP TCP          \\
+\hline
+Explore if packets with Opts take the same Internet path as vanilla packets & Paris Traceroute & R3           & Jan 2023           & UDP               \\
+\hline
+Explore traversal of Opts to the server edge                              & PATHSpider       & P1           & Jul 2020- Jan 2023 & UDP TCP          \\
+\hline
+Explore if variations in Opt type, length or content affects EH traversal   & PATHSpider       & P2           & Jul 2022- Dec 2022     & UDP              
+\end{tabular}
+  \caption{Experiments and Datasets}
+  \label{tbl:datasets}
+\end{table}
+
+Experiment setups are discussed in the next subsections.
+
+    \subsection{RIPE Atlas - access network paths}
+    \label{sec:ripe-methodology}
+
+Datasets R1-R3 in Table~\ref{tbl:datasets} were collected using RIPE Atlas~\cite{bajpai2015lessons}.
+The RIPE Atlas measurement platform was chosen for this study due to its large number of IPv6 vantage points and its ability to perform Paris Traceroute measurements with the PadN Option defined for the Dest and HbH EHs. This option was defined in the original IPv6 standard and its purpose is to pad an EH to ensure 8B alignment, and so is expected to be recognised by most IPv6 implementations.
+RIPE Atlas supports setting the size for both types of EHs when performing measurements. At the time of writing, the platform provides 5464 IPv6 vantage points (probes) across 644 unique Autonomous System Numbers, spanning a range of commercial ISPs and R\&E access networks. The number of probes available fluctuates as volunteer-run probes can become disconnected over time.
+
+We collected traceroutes from all available vantage points on the platform, using both Dest and HbH Opts EHs of 8 Bytes in size, and in each case using UDP and TCP as the underlying transport, to 7 different globally distributed target servers (Dataset R1), without varying the source port and flow label. Baseline UDP and TCP measurements using vanilla IPv6 packets (without an EH) were also collected for each target.
+A separate experiment keeps the destination country fixed, but varies the transport and size of EH between 8 and 64B.
+
+Finally, we use RIPE Atlas to perform Paris Traceroute~\cite{augustin2006avoiding} measurements, aiming to detect whether using an EH impacts the path taken between a vantage point and destination. We only select vantage points where traversal is successful over UDP for both types of tested EH to a specific target, ensuring a total of 866 complete paths are measured.
+We measure these paths using vanilla IPv6 packets, and packets carrying 8 Bytes Dest and HbH Opts EHs. Each measurement is repeated 16 times, with each repetition varying the source port and flow label of the traceroute packets. Each repetition is assigned a Paris ID to identify it. Finally, we repeat each set of 16 Paris measurements 5 times (Dataset R3).
+
+
+    \subsection{PATHSpider - server edge paths}
+    \label{sec:pathspider-methodology}
+
+We use PATHSpider~\cite{learmonth2016pathspider}, a tool for path transparency testing, to survey IPv6-enabled Domain Name System (DNS) servers over multiple years (2019-2023) from the same vantage point located at the University of Aberdeen. At the time this experiment was started, the targets were the IPv6 authoritative Name Servers (NS) for the then-current Alexa Top 1M domains list, and PATHSpider did not have the capability to perform the test over TCP. The longitudinal dataset (Dataset P1) therefore only presents UDP results, and reuses the same set of domains to avoid changes introduced by continuously tracking a Top 1M Domains list. The domains are resolved again prior to each measurement, and any duplicate or unreachable addresses are removed, resulting in between 19,000 and 22,000 unique IPv6 addresses per measurement. 
+%The test also records whether any ICMP messages are received. This allows us to understand if servers on the path dropping EH packets are configured to send ICMP Unreachable messages.
+
+We extend PATHSpider to support measurements over TCP and repeat this test in 2023 using both transports from 5 globally distributed vantage points using the latest version of Cisco Umbrella Top 1M Domains (19054 unique IP addresses) from all locations. When TCP is measured, the EH is inserted on the first packet (the TCP SYN) and all subsequent packets in the connection.
+
+In the latter test, we also vary the Option Type and declared Option Length fields (Dataset P2). This allows us to observe whether different types of options, or incorrectly declared lengths affect EH traversal. For these tests, we also record any ICMP messages received at the sender for a source-destination pair, with the goal of understanding how often ICMP Type 3 (Destination Unreachable) or ICMP Type 4 (Parameter Problem) messages are sent by routers that drop packets carrying an EH. To measure the latter, we ensure one tested Option Types has the highest order bits set to 11, presented in Table~\ref{tbl:options}.
+
+\begin{table}[]
+\begin{tabular}{p{0.03\textwidth}|p{0.055\textwidth}|l|p{0.22\textwidth}}
+Hex value & Highest ord. bits & Type      & Description                                              \\
+0x00      & 000               & HbH, Dest & Pad1 (padding)                                           \\
+0x01      & 000               & HbH, Dest & PadN (padding)                                           \\
+0xC2      & 110               & HbH       & Enable jumbo payloads                                    \\
+0x23      & 001               & HbH       & Low-Power and Lossy Networks routing                     \\
+0x04      & 000               & Dest      & Mechanism for IPv6 encapsulation                 \\
+0x05      & 000               & HbH       & Mechanism for requesting router processing, Router Alert              \\
+0xC9      & 110               & Dest      & Mobility Support in IPv6                                 \\
+0x8C      & 100               & Dest      & Method for identifying subscribers in broadband networks \\
+0x6D      & 011               & HbH       & Multicast Protocol for Low-Power and  Lossy Networks     \\
+0x0F      & 000               & Dest      & Delay measurement                                        \\
+0x30      & 001               & HbH       & Path MTU measurement                                     \\
+0x11      & 000               & HbH, Dest & \multirow{2}{*}{On-path operational info}                \\
+0x31      & 001               & HbH, Dest &                                                          \\
+0x12      & 000               & HbH, Dest & On-path telemetry                                       
+\end{tabular}
+  \caption{Standardised Dest and HbH Option Types.}
+  \label{tbl:options}
+\end{table}
+
+For the server-side measurements described above, the targets selected are DNS servers, due to their ability to be surveyed using both UDP and TCP, although we also present traversal results for the webservers underpinning the Cisco Umbrella top 1M domains.
+
+The following section separately presents the RIPE Atlas access network and PATHSpider server edge results.
+
+\section{RIPE Atlas results} 
+\label{sec:ripe-results}
+
+This section presents results obtained using the RIPE Atlas measurement platform, using a large number of vantage points and testing a limited number of destinations, of which several are under the control of the researcher. The section primarily reports on the traversal rate, or the percentage of paths where test packets were observed to reach the destination AS. Packets not reaching the destination AS are inferred to be dropped. 
+
+\subsection{Traversal to destination AS}
+
+%Prior to each test case, a baseline measurement using vanilla packets was carried out and unreachable probes were subsequently removed from the result set. 
+Figure~\ref{fig:countrybox} shows aggregated traversal results measuring targets in 7 different countries: US, UK, Australia, Poland, Zambia, Kazakhstan and Singapore, from an average of 4750 vantage points. This figure demonstrates the type of EH, transport protocol and choice of destination can affect traversal.
+
+A PadN Dest Opts EH of 8 Bytes (B) in size sees a much higher overall traversal rate compared to the same HbH Opts EH. Similarly, the UDP transport protocol sees a higher traversal rate compared to TCP. Packets with Dest Options traverse a median of 83\% of the paths tested over UDP and 57\% over TCP, whilst packets with HbH Options only traverse a median of 12 and 9\% of paths over UDP and TCP respectively.
+Finally, the spread of values for each EH-transport combination seen in Figure~\ref{fig:countrybox} demonstrates that path traversal varies with the chosen destination. TCP stands out due its large variability, spanning traversal percentages as low as 8\% in the case of the Zambian destination and up to 67\% towards the UK destination. We note that in the case of HbH options, traversal doesn't exceed 20\% (UDP) and 17\% (TCP) respectively.
+
+To determine if traversal is based on size, measurements from all vantage points were run to a single target server using EHs of 16, 32, 40, 48, 56 and 64 Bytes in size (Dataset R2). Each option-size-transport combination was tested separately to detect whether drops are based on the size of the EH and whether this is impacted by the choice of transport, for a total of 129,585 measurements.
+Traversal for each EH size is shown in Figure~\ref{fig:sizes}. We observe that path traversal also depends on size: packets sent with Dest Opts over UDP see the biggest drop in traversal for an EH of 56B in size, dropping from 87\% at 48B to 26\%. Traversal for packets with HbH Opts sees a 2\% dip at 56B and plummets towards 0 at 64B.
+The same pattern shifted by 8B to the left can be seen for packets sent over TCP. Dest Options see the biggest drop for an EH of 48B (from 70\% to 25\%), while HbH sees a 1\% dip at 48B and plummets towards 0 at 56B.
+
+We attribute the 8B difference in traversal for the transports to the size of the transport header.
+We note that adding the size of the TCP (20B) and IP (40B) headers to a 48B EH results in a total IP and transport header size of 108B, and adding the size of the UDP and IP headers to a 56B EH results in a header size of 104B, and note 108B as an "upper limit" beyond which packets with Options suffer significant drops.
+
+\begin{figure}
+\centering
+  \includegraphics[width=0.5\textwidth]{all_traversal.png}
+  \caption{Traversal of HbH and Dest Opts from RIPE Atlas vantage points to target servers located in 7 different countries (dataset R1). }
+  \label{fig:countrybox}
+\end{figure}
+
+\begin{figure}
+\centering
+  \includegraphics[width=0.45\textwidth]{sizes.png}
+  \caption{Traversal percentage of HbH and Dest Opts EHs from RIPE Atlas vantage points to a target server within Janet (AS876), per EH size and split by transport, n=129,585 total measurements, with a mean of 4628 measurements ($\sigma$=351) of for each transport, size and EH combination (dataset R2). The variation in the number of measurements is due to the availability of RIPE Atlas participating probes and changes in probe connectivity over time.}
+  \label{fig:sizes}
+\end{figure}
+
+\subsection{Pathologies}
+    \label{subsec: pathologies}
+
+The results show very low traversal for TCP towards the Kazakhstan and Zambian targets. Both of these target networks have only one BGP peer, and for both, we find that the majority (over 50\%) of TCP packets see their last reply from a router in the destination's upstream AS. In both cases, plotting the path traversal to the AS upstream of the destination AS reveals similar results to targets in other tested countries. This is shown in Figure~\ref{fig:traversal_pathologies}.
+
+\begin{figure}
+\centering
+  \includegraphics[width=0.5\textwidth]{traversal-pathologies.png}
+  \caption{Traversal from RIPE Atlas vantage points to both destination and upstream AS for targets in Kazakhstan (n=5075) and Zambia (n=4462). The figure shows the traversal percentage of TCP packets using both types of tested EH.}
+  \label{fig:traversal_pathologies}
+\end{figure}
+
+The Kazakhstan network's only BGP peer is Hurricane Electric (AS6939). The baseline measurements reveal the network uses HE's tunnel brokering service - (the IPv6 peering is tunneled over an existing IPv4 connection), using a tunnel endpoint physically located in Dusseldorf. Upon closer inspection, we find that the 7\% of paths where packets traverse to the destination network originate (with 3 exceptions) in ASes located Australia/New Zealand. The 50\% dropped packets that originate in other geographical areas are filtered at the tunnel endpoint. We therefore assume misconfiguration or a policy within the HE transit network routers results in this pathology. 
+%They can also come from comcast but somehow they bypass HE?!?!?!?!
+
+
+The only BGP peer of Zambia's target network is Ubuntunet Alliance For Research and Education Networking (AS36944). Over 50\% of packets are dropped at the last hop seen in this AS. As there is no common origin for the results that do traverse, we attribute the drops to a network filtering device. 
+
+\subsection{Path traversal analysis}
+
+Tables~\ref{tbl:uk_as1} and \ref{tbl:uk_as2} present the traversal percentage of packets with an 8B EH at each AS on the path to the UK destination. We observe the majority of packet drops happen in the first AS on the path (the vantage point AS) - between 68\% HbH Options (UDP) and 74\% (TCP) packets and 5\% (UDP) to 25\% (TCP) of Dest Options packets. The difference due to transport is still prevalent when the results are split per AS. 
+We note the source AS drop is common to all RIPE measurements regardless of destination. Dest options over UDP do not see drops greater than 1\% as they further traverse ASes, suggesting they traverse the Internet core.
+
+We further investigate where within the source AS EH packets are discarded, and find the majority of drops happen at the very first router on the path (i.e. the vantage point's local gateway).
+Figure~\ref{fig:empty_paths} shows the percentages of paths where packets are dropped at the very first router on the path - i.e. paths where no traceroute responses are received for test packets, but are received for control packets. Packets carrying HbH Options are dropped at the local router on more than 50\% of paths, and this varies very little with transport (54\% for UDP and 56\% for TCP, for an 8B EH). In contrast, only between 2 and 15\% of paths see drops of packets carrying Dest Opts, an this varies with transport (2.5\% for UDP and 10\% TCP for an 8B EH). The drop percentage increases with size regardless of EH used.
+
+
+The local gateways for this set of vantage points are a diverse mixture of edge routers connecting enterprise LANs, mobile and broadband networks, and which are expected to perform a variety of functions, including access control, authentication or which require transport header information. A common modification made by edge routers is clamping of the Maximum Segment Size (MSS) option in the TCP header. This is done to avoid problems which otherwise arise from Path MTU discovery. 
+There is unfortunately no way to determine whether the drops are a result of configuration policy or lack of support. 
+However, it is possible to isolate paths that insert TCP options such the MSS option by examining the packets after they arrive at the destination in the baseline measurement. By default, the packets sent with RIPE do not include an MSS option - if present at the destination, this means a device on that path has inserted it.
+We identify 853 paths where an on-path device has inserted an MSS option in our baseline measurements to the UK destination. We then look at EH traversal within this subset of paths to determine whether this characteristic makes a difference for the overall traversal percentage, on the basis that at least one on-path device will have needed to parse the entire IPv6 Header, including any EHs, to perform its function.
+We find a traversal of only 2.6\% for HbH and 48.1\% for Dest Opts for this subset of paths, indicating dropping is more prevalent where an on-path device that modifies the TCP MSS option exists.
+
+
+\begin{figure}
+\centering
+  \includegraphics[width=0.5\textwidth]{empty_paths.png}
+  \caption{Percentage of paths where packets are dropped at the first router, per EH, transport protocol and size.}
+  \label{fig:empty_paths}
+\end{figure}
+
+
+\begin{table}[]
+\centering
+\caption{Per-AS drop attribution for 8B Dest Opts packets sent from n=4970 RIPE Atlas vantage points to a target destination in AS786. The local AS is responsible for the majority (5\% for UDP and 25\% for TCP) of the drops.}
+ \label{tbl:uk_as1}
+
+\begin{tabular}{l|l|l|l}
+                                   & 1st AS & AS1\textgreater AS2 & $inf $     \\ \hline 
+
+{Dest UDP 8B} & 95.3\% & 93\%                 & 91.5\% \\ \hline
+
+{Dest TCP 8B} & 74.7\% & 70\%                 & 68.5\%
+\end{tabular}
+\bigskip
+\caption{Per-AS drop attribution for 8B HbH Opts packets sent from n=4970 RIPE Atlas vantage points to a target destination in AS786. The local AS is responsible for the majority (68\% for UDP and 74\% for TCP) of the drops.}
+\begin{tabular}{p{0.07\textwidth}|l|l|l|l|l}
+
+              & 1st AS & AS1\textgreater{}AS2 & 2nd AS & AS2\textgreater{}AS3 & $inf$     \\ \hline
+HbH UDP 8B & 31.4\% & 20.1\%               & 15\%   & 12.2\%               & 11.4\% \\ \hline
+HbH TCP 8B & 26.9\% & 16.3\%               & 13.9\% & 9.7\%                & 8.6\%  \\ 
+\end{tabular}
+ \label{tbl:uk_as2}
+\end{table}
+
+
+\subsection{Internet path analysis}
+
+Load balancing routers are another type of on-path devices that can operate on the upper layer headers of a packet. To determine whether this function is impacted by packets with EHs, we perform Paris Traceroute measurements. This tool aims to detect the presence of load balancing on a given path~\cite{augustin2006avoiding}, by performing multiple traceroute measurements varying several header fields (a 'Paris variation'); on-path devices may use several of these fields for load-balancing purposes. To identify the packets sent for a specific measurement, Paris Traceroute relies on  TCP's sequence number field or the checksum field in the case of UDP.
+
+We run 6 sets of measurements from RIPE Atlas vantage points to the Zambian destination, with each set using 16 Paris variations. We carefully select the vantage points and destination based on previous measurements, so as to only measure complete paths, where traversal always succeeds. We find a total of 866 paths. The Paris Traceroute version used by RIPE Atlas varies the IPv6 Flow Label and transport port number deterministically between individual Paris measurements. Each group of 16 Paris measurements is considered a measurement run. The same combinations of IPv6 Flow Label and port number are used for subsequent measurement runs.
+
+\begin{figure}
+\centering
+  \includegraphics[width=0.5\textwidth]{boxplot-paths-detected.png}
+  \caption{Number of paths detected by Paris Traceroute in 866 source-destination pairs, averaged over 5 measurement runs, with each run using the same 16 Paris variations. The baseline measurement using vanilla packets is compared against Dest and HbH Opts measurements (Dataset R3).}
+  \label{fig:paths-detected}
+\end{figure}
+
+Figure~\ref{fig:paths-detected} compares how many of paths are discovered by Paris Traceroute when using vanilla IPv6 packets versus packets that use an 8B Dest or HbH Opts EH.
+A total 16 Paris variations discover on average 4 paths~\cite{augustin2006avoiding}. We reproduce this in our baseline results, which find a median of 4.1 hops. However, the medians for measurements where packets carried an 8B Dest or HbH Opts EH are 2.96 and 2.1 respectively (Figure~\ref{fig:paths-detected}).
+
+For 518 (60\%) of source-destination pairs, measurements performed with Dest Opts EHs detect the same (+-1 path) number of paths as the baseline. For 328 (38\%) pairs, the measurements detect fewer (by 1 path or more) number of paths than the baseline. On the other hand, measurements using HbH Opts EHs detect the same (+-1 path) number of paths as the baseline for only 115 (13.4\%) source-destination pairs. Much more commonly, fewer paths are detected when this type of EH is used compared to the baseline. This happens on 604 paths (69.7\%). This pathology could happen, for example, if ECMP-enabled routers use a byte offset for their hash calculations. Overall, this means that packets with an HbH EH are less likely to take the same internet path as a vanilla packet.
+
+For some source-destination pairs, the EH Paris measurements detect at least 1 more path than the vanilla measurements. These cases are rare - around 1\% (8 paths for Dest Opts and 10 for HbH Opts), but can however reveal interesting pathologies.
+For example, for one pair the baseline measurement detects 4 paths, the Dest Opts measurement detects 2 paths, while the HbH measurement detects 14(!) different paths. Upon closer inspection we find a single router that enumerates 14 interfaces, only in the presence of packets containing HbH EHs.
+%For 12 source-destination pairs in the dataset, not enough data was gathered using Destination Option EHs to complete a measurement run. Not enough data was gathered for 137 (15.8\%) pairs.
+This set of measurements indicates that not all load balancer implementations are well suited for packets carrying the HbH or Dest Opts EH.
+
+
+\section{Pathspider results} 
+\label{sec:pathspider-results}
+
+This section presents results obtained with PATHspider. In contrast to the RIPE Atlas tests, these experiments use a limited number of vantage points and target a large number of destinations. Where the destination is an authoritative NS, PATHSpider first performs a control measurement by sending a DNS query to the server using vanilla IPv6 packets. The same measurement is then repeated using an 8 Byte PadN Dest or HbH Opts, and in each case the test is considered successful if the server replies to the DNS query. Where the destination is a web server, the test can only be done over TCP by sending a TCP SYN, and is considered successful if the server replies with a TCP SYN-ACK.
+This section reports on the end-to-end support, or the percentage of paths where test packets were observed to receive a response from the destination server.
+
+\begin{table}[]
+\begin{tabular}{c|cc|cc}
+\multicolumn{1}{l|}{} & \multicolumn{2}{c|}{Dest Opts Support} & \multicolumn{2}{c}{HbH Opts Support} \\ \cline{2-5} 
+\multicolumn{1}{l|}{} & \multicolumn{1}{c|}{TCP}       & UDP      & \multicolumn{1}{c|}{TCP}     & UDP     \\ \hline
+UK                    & \multicolumn{1}{c|}{70.8}      & 71.9     & \multicolumn{1}{c|}{11.5}    & 11.9    \\ \hline
+Canada                & \multicolumn{1}{c|}{72.6}      & 72.1     & \multicolumn{1}{c|}{19.9}    & 19.0    \\ \hline
+Australia             & \multicolumn{1}{c|}{75}        & 76       & \multicolumn{1}{c|}{20.3}    & 19.6    \\ \hline
+Singapore             & \multicolumn{1}{c|}{77.2}      & 73.8     & \multicolumn{1}{c|}{25.2}    & 17.4    \\ \hline
+Poland                & \multicolumn{1}{c|}{72.4}      & 72.4     & \multicolumn{1}{c|}{20.7}    & 19.8   
+\end{tabular}
+\label{tbl:e2e_traversal}
+\caption{End-to-end support for an 8B Pad N option for both Dest and HbH EHs, from vantage points in 5 countries to n=20082 unique authoritative NSes in 2787 different known ASes. All measurements performed in December 2022, part of Dataset P1.}
+\end{table}
+
+\begin{table}[]
+\begin{tabular}{c|c|c|c}
+           & \% of dataset & Supports Dest Opts & Supports HbH Opts \\
+\hline
+Cloudflare & 18                      & Yes                & No                 \\
+\hline
+Amazon     & 11                     & No                 & No                 \\
+\hline
+Hetzner    & 3                     & Yes                & No                 \\
+\hline
+Gandi      & 4                     & No                 & No                 \\
+\hline
+Ionos      & 3                    & Yes                & No                
+\end{tabular}
+\label{tbl:provider_support}
+\caption{End-server support for the Dest and HbH Opts for major DNS server providers, n=99,987 paths, based on measurements from December 2022. Google does not support either option, and is not listed in the table as it only had 30 destinations in the dataset.
+}
+\end{table}
+
+\subsection{End-to-end support}
+\label{subsec:e2esupport}
+
+Table~\ref{tbl:e2e_traversal} presents the end-to-end support for the authoritative NSes for the 1M domains list used for longitudinal measurements, alongside support for the current Cisco Umbrella top 1M Domains list published in December 2022.
+
+As with the access network results previously presented, support varies between the Dest and HbH EHs: 70 to 77\% of the tested servers replied to packets using Dest Opts, and up to 25.2\% do so for HbH Opts. Traversal does not vary with transport in the same way seen for the access network results presented in the previous section. We attribute this to the lack of edge router devices normally present in access networks. Only one measurement, from the Singapore vantage point, sees a 5\% difference based on transport in favour of TCP.
+Finally, the table shows variations in support based on vantage point - support varies between 12 to 25.2\% for HbH Opts, indicating fewer packets dropped in transit networks in the latter case.
+
+However, around one third of destinations in the DNS dataset featured in Table~\ref{tbl:e2e_traversal} are hosted by a few major hosting companies (Cloudflare, Amazon, Gandi etc.) which employ network policies to filter packets with some EHs in their network. End-server support for major DNS server providers are presented in Table~\ref{tbl:provider_support}. In Early December 2022, Cloudflare servers started responding to DNS queries send over packets with Dest options, resulting in a jump from 57\% to over 70\% for the dataset. If all major providers would enable support, this would bring the success of the E2E test to over 90\% for Dest Opts and 60\% for Hbh Opts for this dataset.
+
+Where testing end-to-end support for webservers in the latest 1M domains, we find this to be very low: between xx and yy for Dest Opts packets and between xx and yy for HbH Opts.
+The list of most visited domains will make use of Content Delivery Networks (CDNs), and CDNs or proxy services which do not carry IPv6 packets to the web server that they front. Moreover, the list of webservers is much more dominated by a few major hosting companies: around xxx\% (40ish percent iirc) are hosted by Cloudflare, which by default does not carry IPv6 packets to the origin server, although they allow this feature to be enabled at extra cost.
+
+\subsubsection{Traversal}
+
+We note that end-to-end support is not the same metric as path traversal. The latter is only concerned to whether packets reach the destination AS. To work out the path traversal for this dataset, we further perform traceroutes to the servers where a reply was not already seen.
+NEED TO FILL IN - this will show that traversal is closer to the 95\% mark for Dest Opts and 40\% for HbH opts. This is indeed similar for HbH (and much better for Dest Opts) compared to the traversal Jen and Fernando found in 2014 for the top 1M domains.
+
+
+\subsubsection{Option Type support}
+
+We repeated the experiment described above from one vantage point, varying the Option Type and Option Lnegth fields. 
+Table~\ref{tbl:option_type_support} shows the support for different Option Types within the authoritative NSes for the current Cisco Top 1 Million Domains. We test a well-known option, PadN~\cite{rfc2460}, against a recently-standardized one - Minimum Path MTU HbH Option~\cite{rfc9268}. We also test two experimental options, 30 and 254~\cite{RFC4727}. The latter was chosen to test the traversal behaviour where the Option Type has its two most significant bits set.
+We find that the Option Type does not affect traversal where the two most significant bits of the field are not set - with the same traversal percentage for PadN, PMTU Discovery and Experimental Option 30. Where the highest order bits are set, traversal is expected to be 0 - however, we still receive responses on 0.4\% of paths, indicating all devices on that path have ignored these bits.
+
+The same applies for an incorrectly set Option Length field. As any device parsing the EH field should validate the Option Length set for each option, traversal is expected to be 0; however we still find a small number of paths (0.5\%, or around 80 paths) where all devices on the path ignore this field.
+
+\begin{table}[]
+\begin{tabular}{l|l|l}
+Test                      & Dest Options EH & HbH Options EH \\
+\hline
+Pad N option (1)          & 69.3           & 15.1          \\
+PMTU Discovery (48)       & 69.5           & 15.8          \\
+Experimental Option (254) & 0.4            & 0             \\
+Experimental Option (30)  & 69.4           & 15.1          \\
+Incorrect Option Length   & 0.5            & 0.05            
+\end{tabular}
+\label{tbl:option_type_support}
+\caption{End-to-end support for different Option Types in the authoritative NSes for the Cisco Top 1 Million Domains, n=19052 unique IPv6 targets. The transport used was UDP (Dataset P2).}
+\end{table}
+
+\subsubsection{ICMP messages received at the source}
+
+Experimental Option 254 has its two most significant bits set. This means routers should discard packets with this option set and return an ICMP Type 4 Parameter Problem. To examine this, we extend PATHSpider to collect any ICMP messages received at the vantage point. 
+
+We find variable behaviours and configurations from the different locations we test. These are described in Table xxxx. Note: This table will show that many routers are correctly configured and do send the correct ICMP message, but that bugs still exist.
+
+
+\subsubsection{Longitudinal support}
+
+Table~\ref{tbl:longitudinal_support} presents measurements over the same set of domains over the course of 3 years. The domains were resolved prior to each measurement, resulting in a variation of the total unique IP addresses tested, presented in the last table row. The results show a trend towards lower support for HbH Opts, with Dest Opts support remaining constant over time, until December 2022 when Cloudflare enables support as described in Subsection~\ref{subsec:e2esupport}.
+
+% Ana: verify total number of paths.
+\begin{table}[]
+\begin{tabular}{l|l|l|l|l}
+                    & Jan 2020 & Jul 2020 & July 2022 & Dec 2022 \\
+\hline
+Dest Opts & 59.9\%   & 54.3\%   & 57.4\%    & 71.7\%   \\
+HbH Opts  & 25.7\%   & 23.8\%   & 16.4\%    & 11.9\%   \\
+\hline
+Unique IP addresses & 18296    & 19690    & 19553     & 20050   
+\end{tabular}
+\label{tbl:longitudinal_support}
+\caption{End-to-end support for an 8B Pad N option for both Dest and HbH EHs, from one vantage point to the authoritative NSes for the same set of 1M domains, between Jan 2020 and Dec 2022 (Dataset P1). The transport used was UDP.}
+\end{table}
+
+\subsection{AS analysis }
+
+Table~\ref{tbl:as_pathspider} presents ASes targeted by Pathspider (2868 in total) alongside evidence that they support either the Dest or HbH EH.
+If at least one reply is seen from that AS to one of our test packets from any of the locations tested, we consider that AS supports the traversal of packets using the tested EH type. Thus, at least 92.4\% of destination ASes allow traversal of packets carrying an 8B Dest Opts EH, and more than half, 53.8\%, allow an 8B HbH Options EH. The percentage drops when we consider multiple paths towards that AS, revealing that many packets carrying EHs are dropped in en-route in an AS different from the destination AS. For Dest Opts, 3.4\% fewer ASes support Dest Opts on more than half the paths, whereas for HbH Opts, the difference is 16.6\%.
+When only considering the subset of ASes (1606) tested over 10 or more paths, the results vary little: at least 93.2\% of destination ASes allow traversal of packets carrying an 8B Dest Opts EH, and more than half, 55.9\%, allow an 8B HbH Opts EH.
+
+    \begin{table}[]
+\begin{tabular}{p{0.195\textwidth}|p{0.11\textwidth}p{0.118\textwidth}}
+                                          & Paths per AS$>$=1 & Paths per AS$>$=10 \\ \cline{1-3} 
+Total number of ASes                      & 2787                                            & 1606                                            \\ \hline
+AS does not support Dest Opts               & 212 (7.6\%)                                     & 110 (6.8\%)                                     \\
+AS supports Dest Opts on 1 or more paths   & 2575 (92.4\%)                                   & 1496 (93.2\%)                                   \\
+AS supports Dest Opts on 50\% paths or more & 2476  (88.8\%)                                  & 1437 (89.4\%)                                   \\ \hline
+AS does not support HbH Opts               & 1287 (46.2\%)                                   & 709 (44.1\%)                                    \\
+AS supports HbH Opts on more than 1 path   & 1500 (53.8\%)                                   & 897 (55.9\%)                                    \\
+AS supports HbH Opts on 50\% paths or more & 1037 (37.2\%)                                   & 580 (36.1\%)                                   
+\end{tabular}
+\label{tbl:as_pathspider}
+\caption{Number of ASes where DNS servers can be reached via packets carrying either Dest or HbH Opts. The first column considers all destination ASes in the dataset, while the second only looks at ASes that host 10 destinations or more. Based on measurements from December 2022 (Dataset P1).}
+\end{table}
+
+\section{Discussion} 
+\label{sec:discussion}
+
+Question 1: do extension header actually traverse common Internet paths? Is there a longitudinal trend making this more easy or harder?
+
+
+Question 2: is there a limit to extension headers that prevents them from traversing certain Internet paths such as limiting length of the EH chain or a specific EH length? Would limits help in ensuring consistent deployment? Is it different between HBH and DO?
+
+
+Question 3: When options extension headers do traverse, do they traverse consistently for the same pair of endpoints? Is the flow label a help in ensuring a consistent set of network devices on a path?
+Is there a trend to set meaningful entropy in the flow label against the original place where many endpoints sent a zero value flow label?
+Here we should not forget the proposals to add flow metadata as a hop by hop extension to let network devices know helpful information to consider how to fold the packets in a flow.
+
+
+Question 4: is there a possibility to deploy a different new option...is this sensitive to the format of the option or the presence of a new defined option? This is a part whether a specific option causes the traverse ability to change, or whether an illegal format option changes the traversability of the packet.
+
+
+Question 5: If we find HBH options don’t work everywhere then ….What is the opportunity for using a hop by hop extension header on some of the packets belonging to a flow? does this result in new forwarding pathologies? That is where the packets with extension headers take a different set of devices to the packets without extension headers, and if so do they take a different network or do they simply follow a different path through the same operator network? Does this result in inconsistent loss? Is the option useful ?
+
+
+Question 6: what is the opportunity for destination options? Is it a good trade-off to have a network layer? That is consistent transport header or is it wiser to put the transport header information within the transport and therefore allow it to be encrypted such as quic transport parameter - so what is the real advantage of destination options?
+
+---
+
+We find that packets with EHs traverse Internet paths in many cases, and that many ASes allow support.
+Still, we find traversal is variable depending on EH, size, transport and type of network. We find these EHs can impact the function of load balancing routers and devices that modify the TCP MSS options and that deploying them in the Internet needs to take into account the type of network these will operate over.
+Packets with options are still dropped in transit networks, as validated on paths to server edge networks in Table~\ref{tbl:as_pathspider} and paths originating in access networks in Figure~\ref{fig:countrybox}. Misconfiguration or other network policies can result in pathologies within transit networks as shown in Subsection~\ref{subsec: pathologies}.
+
+EHs up to 40B in size sent over UDP have the highest chance of traversing access network paths, as shown in Figure~\ref{fig:sizes}.
+Our results also show that most routers are configured to discard packets and send ICMP messages as specified by~\cite{RFC4443} when encountering an option that cannot be processed.However, we still find instances where a router sends this message in response to a Dest Opts EH that has both most significant bits set, but packets are forwarded nevertheless; a more common pathology is forwarding HbH Opts EH packets with both most significant bits set without sending an ICMP message.
+ 
+RFC 7872~\cite{RFC7872} describes the traversal to the authoritative NSes for the Alexa Top 1M domains in 2014. They find 21.33\% of NSes drop packets carrying an 8B PadN Dest Opt and 54.12\% drop packets carrying an 8B PadN HbH Opt.
+Their results are not grouped per AS, and so our results confirm an (in)crease in support for both types of options from aa and bb to xx and yy respectively.
+%although this may reflect changes within the the top 1M domain list itself (Table~\ref{tbl:as_pathspider}) between 2014 and 2023.
+
+Testing the same set of 1M domains between 2019 and 2022 reveals the support for 8B PadN HbH Opts decreases over time when considering individual destinations (Table~\ref{tbl:longitudinal_support}) as more NS servers become centralised under only a few ASes that do not support HbH Opts. However, an AS analysis reveals more than half of the tested ASes support HBH and more than 90\% support Dest Opts, and that transit networks can represent a barrier to deployment for HbH Opt packets.
+
+We also find that traversal does not depend on the type of option sent (see Table~\ref{tbl:option_type_support}) and so any new specified Dest or HbH Opts (such as the Min. PMTU Discovery Option~\cite{rfc9268}) will not be automatically dropped and their traversal will not depend on changes to deployed infrastructure.
+
+Traffic flows that mix packets with options and packets without options must take care as they may not travel on the same Internet path.
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\bibliographystyle{abbrv}
+\small
+\bibliography{main,rfc}
+
+
+\end{document}

@@ -1,0 +1,180 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+
+\title{Is it possible to extend IPv6?}
+\date{December 2022}
+
+\author{\IEEEauthorblockN{Ana Custura}
+\IEEEauthorblockA{
+\textit{University of Aberdeen}\\
+}
+\and
+\IEEEauthorblockN{Raffaello Secchi}
+\textit{University of Aberdeen}\\
+\and
+\IEEEauthorblockN{Gorry Fairhurst}
+\textit{University of Aberdeen}\\
+}
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Excellent abstract ensues.
+\end{abstract}
+
+\begin{IEEEkeywords}
+IPv6 Options, Destination Options, Hop-by-Hop Options, IP protocol
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:introduction}
+
+The design of any Internet protocol needs to operate functionally over a wide
+range of path characteristics and be robust to changes in the set of devices
+forming the network path.  
+
+Extension headers (EH) add utility to IPv6 packets, allowing for Routing, Fragments, Options.
+However, they faced challenges in deployment due to lack of support in hardware-based forwarding and concerns around potential denial-of-service attacks. Even today, they are dropped by middleboxes and their traversal is variable depending on the Internet path.
+This paper provides comprehensive wide-scale measurements across consumer edge, server edge and Internet core paths, to quantify the current path traversal and remaining challenges in deployment for different types of IPv6 options.
+Section \ref{sec:discussion} explores the challenges to deploying EH across an Internet path, and what opportunities exist in using them across an administrative domain.
+
+\section{IPv6 option deployment}
+\label{sec:ipv6-option-deployment}
+\subsection{Hop-by-hop options}
+\subsection{Destination options}
+\subsection{Routing Header}
+\subsection{Fragment Header}
+
+
+\section{Motivation}
+\label{sec:motivation}
+
+
+\section{Methodology} 
+\label{sec:methodology}
+
+Previous studies have explored the traversal of IPv6 options across a range of paths.
+
+The following table shows the set of options and the sizes tested. Where available, we
+compare with results collected in 2019 and 2020 using the same methodology.
+We explicitly test the options in~\cite{james} to allow for comparison and reproducibility.
+
+
+
+
+Each option-size pair is tested separately.  The larger sizes aim to detect
+whether hops filter based on the size of the option (as is the case for ICMP). By
+comparing the incoming packets and their IPv6 Headers with those sent,
+Extension Header breakage and manipulation can be detected.
+
+We collect traceroute-style measurements for all vantage points tested, using both UDP and ICMPv6 messages sent with at EH containingn either Hop-by-Hop or Destination PadN option header of 8B in size.  We then
+break down the behaviour by AS number.
+
+\subsection{Server edge}
+\label{sec:server-edge}
+
+TCP SYNs or DNS Queries over UDP packets encapsulated in IPv6 with a Hop-by-Hop
+or Destination Options Header are sent from eight Digital Ocean and one UoA vantage points to targets in the Alexa Top 1 Milion Domains.
+The UDP tests target the IPv6 authoritative DNS servers for the Alexa Top 1M domains, for a total of over 22000unique IPv6 targets. The TCP tests targets the IPv6 webservers in the same list, for a total of over 125000 unique targets. 
+
+The test also records whether any ICMP messages are sent by any servers on the path. This allows us to understand if servers drop the option and send an ICMP Unreachable message.
+
+To better understand where in the network the options get dropped, we complement this with traceroute-style measurements to a subset of the same paths.
+
+\subsection{Consumer edge}
+\label{sec:consumer-edge}
+
+The Ripe Atlas platform allows us to perform traceroute measurements from 4000 vantage points in a mix of consumer and research networks.
+Two different tests are explored.
+
+\begin{itemize}
+
+\item A traceroute-style measurement.  TCP SYNs or DNS Queries over UDP packets encapsulated in IPv6 with a Hop-by-Hop or Destination Options EH are sent from each Ripe Atlas vantage point to a server in
+the UoA network. This uses \textit{tcpdump} to record any packets received at the target destination. The test is considered successful if the packets sent are seen at the target server. If a sent packet does not arrive, then we examine the Ripe Atlas results to extract the last hop seen on the path, and perform a traceroute using IPv6 option packets to understand if the drop is symmetric (i.e. the specific format of packet is not delivered to the vantage point. 
+The Ripe Atlas platform only supports testing using an EH with a 'NOP' IPv6 Hop-by-Hop and Destination Options.
+
+
+\item A DNS server measurement. DNS Query packets are sent from each Ripe Atlas vantage point to a DNS server at the University of Aberdeen. Using the DNS Query, the vantage point can request a reply is encapsulated in a specific IPv6 option and size. We then examine whether this encapsulated reply arrives back at the target. The website is made public, allowing measurements to be performed from any vantage point with an IPv6 address.
+The advantage of this test is that all types of options and sizes can be tested without limitation.
+
+\end{itemize}
+
+
+\subsection{Datasets} 
+\label{sec:datasets}
+
+The datasets are presented in Table \ref{tbl:datasets}. To note that Datasets A.1, A.2 and B.2 used all available types of options in July 2022, and a subset in previous years.
+Dataset B.3 is limited to Destination options and Hop-by-Hop NOP options.
+
+
+
+\section{Consumer edge results} 
+\label{sec:ripe-results}
+
+\subsection{End-to-end traversal}
+
+Results in Table~\ref{tlb:ripe-traversal} show packets with the smallest possible (8B) PadN Destination Option EH traverse 92\% of the paths, where the transport used is UDP. For TCP, traversal of the same EH drops to 68\%. The results also show an 8B PadN Hop-by-Hop Option EH traverses up to 11\% of the paths. The transport protocol difference is observed regardless of EH.
+
+\begin{table}[]
+\centering
+\begin{tabular}{l|l|l}
+\hline
+                                                           & DOpt & HbHOpt \\ \hline
+UDP \% traversal & 92   & 11     \\ 
+\hline
+TCP \% traversal & 68   & 9      \\ 
+\hline
+\end{tabular}
+\label{tbl:ripe-traversal}
+\caption{Percentage of paths where traversal of packets with Destination Options and Hop-by-Hop Options is successful, split by transport.}
+\end{table}
+
+
+The choice of transport protocol is not the only factor that influences traversal. Size 
+
+
+\subsection{Path traversal}
+\subsection{Pathologies}
+
+
+\section{Server edge results} 
+\label{sec:alexa-results}
+
+
+
+
+Around 50\% of tested DNS servers support IPv6 Destination options, reliably from all sites
+HbH traversal varies greatly depending on the vantage point.
+The traversability of HBH options has not XXXXXX
+
+ In another test, a padN option is included that advertises an invalid length. A pacjet that includes this only traverses 0.2\% of paths. This is an indication that routers check this.
+ 
+A valid, but unknown option (e.g. we assume that Min PMTU is not yet widely implemented) has the same traversal rate as a well-known one (PadN).
+This is an indication that routers  XXXX.
+
+Out of 1.8 M packets examined, none of the packets modified the included PadN option.
+One hop entirely removed the fields for both Extension Headers.
+
+When dropped, only 2\% of paths received an ICMPv6 response that quoted the EH.
+But mostly, ICMP and IPv6 Options are dropped without reporting an error. This is the default behaviour for many firewalls (pf, ipfw and other firewalls based on these).
+%
+
+\section{Discussion} 
+\label{sec:discussion}
+
+I many cases, the Dest and HbH options travel “far” along a path. This is an indication that routers in general have been configured to XXX.
+
+An exception is when packets are sent from an access network.
+In many cases, options are forwarded to the destination and can be used - however in some cases the packet including the option is dropped.
+This suggest IPv6 Options may best be applied to probe packets that don’t impact a flow’s normal traffic.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\bibliographystyle{abbrv}
+\small
+\bibliography{main}
+
+
+\end{document}

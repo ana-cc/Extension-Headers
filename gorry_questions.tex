@@ -1,0 +1,70 @@
+> Question 1: do extension header actually traverse common Internet paths? 
+> 
+> 
+> 
+> Is this a Question about the topology  or  the type path, big traversed? We identify different types of devices that might read into the payload of a pocket. Perhaps we should talk about these a little here, such as firewalls with different incentives, such as load balancers with incentives such as monitoring devices to monitor performance, protect against dos et cetera.
+> 
+> 
+> 
+> Is there a longitudinal trend making this more easy or harder?
+> 
+> 
+> 
+>  question 2: is there a limit that extension header prevents it from traversing certain Internet paths such as limiting length of the EH chain or a specific EH length?
+> 
+> 
+> 
+> Would limits help in ensuring consistent deployment?
+> 
+> 
+> 
+> Is it different HBH and DO?
+> 
+> 
+> 
+> Question 3: When HBH options anextension headers do traverse, do they traverse, consistently for the same pair of endpoints?
+> 
+> 
+> 
+> For hop by hop options, do paths consistently forward packets over the same set of network devices? is the flow label a help in ensuring a consistent set of network devices on a path?
+> 
+> 
+> 
+> This brings us to ECMP does random ECMP prevail in some cases or is entropy used from the packet header, in which case what happens if the entropy is not present? and what happens if the flow label  is available? does this remove the need to find deeper transport layer information for entropy.
+> 
+> 
+> 
+> Is there a trend to set meaningful entropy in the flow label against the original place where many endpoints sent a zero value flow label?
+> 
+> 
+> 
+> What could we find out if Paris traceroute  actually allowed us to set or unset a flow label?
+> 
+> 
+> 
+> Here we should not forget the proposals to add flow metadata  as a hop by hop extension to let network devices know helpful information to consider how to fold the packets in a flow.
+> 
+> 
+> 
+> Question 4: is there a possibility to deploy a different new option in an extension header apart sensitive to the format of the option or the presence of a new defined option?
+> 
+> 
+> 
+> This is a part whether a specific option causes the traverse ability to change, or whether an illegal format option causes traverse ability of the packet, and therefore other options to also change.
+> 
+> 
+> 
+> Question 5: If we find HBH options don’t work everywhere then ….What is the opportunity for using a hop by hop extension header on some of the packets belonging to a flow? does this result in new forwarding pathologies? That is where the packets with extension headers take a different set of devices to the packets without extension headers, and if so do they take a different network or do they simply follow a different path through the same operator network? Does this result in inconsistent loss? Is the option useful ?
+> 
+> 
+> 
+> Question 6: what is the opportunity for destination options? Is it a good trade-off to have a network layer? That is consistent transport header or is it wiser to put the transport header information within the transport and therefore allow it to be encrypted such as quick transport parameter what is the real advantage of destination options?
+> 
+> 
+> 
+> Are you measuring the path?
+> 
+> 
+> 
+> Don’t drop EH ?
+> 

@@ -1,0 +1,276 @@
+@inproceedings{james-imc,
+author = {L\'{e}as, Rapha\"{e}l and Iurman, Justin and Vyncke, \'{E}ric and Donnet, Benoit},
+title = {{Measuring IPv6 Extension Headers Survivability with James}},
+year = {2022},
+isbn = {9781450392594},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3517745.3563019},
+doi = {10.1145/3517745.3563019},
+abstract = {This extended abstract introduces James, a new tool for measuring how IPv6 Extension Headers (IPv6 EHs) are processed in the network. James sends specially crafted Paris traceroute packets between a set of controlled vantage points. Early measurement results show that IPv6 EHs may be dropped in the network, depending on their type and the size of the Extension Header.},
+booktitle = {Proceedings of the 22nd ACM Internet Measurement Conference},
+pages = {746–747},
+numpages = {2},
+location = {Nice, France},
+series = {IMC '22}
+}
+
+@techreport{rfc9268,
+    series =    {Request for Comments},
+    number =    9268,
+    type = {RFC},
+    institution = {IETF},
+    doi =       {10.17487/RFC9268},
+    url =       {https://www.rfc-editor.org/info/rfc9268},
+    author =    {Robert Hinden and Gorry Fairhurst},
+    title =     {{IPv6 Minimum Path MTU Hop-by-Hop Option}},
+    year =      2022,
+    month =     aug,
+}
+
+@techreport{james,
+    number =    {draft-vyncke-v6ops-james-02},
+    type =      {Internet-Draft},
+    institution =   {IETF},
+    publisher = {IETF},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-vyncke-v6ops-james/02/},
+    author =    {{É. Vyncke and R. Léas and J. Iurman}},
+    title =     {{Just Another Measurement of Extension header Survivability (JAMES)}},
+    pagetotal = 17,
+    year =      2022,
+    month =     jul,
+}
+@INPROCEEDINGS{passive-threats,
+  author={Hendriks, Luuk and Velan, Petr and Schmidt, Ricardo de O. and de Boer, Pieter-Tjerk and Pras, Aiko},
+  booktitle={2017 Network Traffic Measurement and Analysis Conference (TMA)}, 
+  title={{Threats and surprises behind IPv6 extension headers}}, 
+  year={2017},
+  volume={},
+  number={},
+  pages={1-9},
+  doi={10.23919/TMA.2017.8002912}}
+
+
+@techreport{elkins-v6ops-eh-deepdive-fw-01,
+    number =    {draft-elkins-v6ops-eh-deepdive-fw-01},
+    type =      {Internet-Draft},
+    institution =   {Internet Engineering Task Force},
+    publisher = {Internet Engineering Task Force},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-elkins-v6ops-eh-deepdive-fw/01/},
+        author =    {Nalini Elkins and michael ackermann and Dhruv Dhody},
+    title =     {{Deep Dive into IPv6 Extension Header Testing}},
+    pagetotal = 10,
+    year =      2022,
+    month =     oct,
+    day =       21,
+    abstract =  {IPv6 Extension Header testing is a complex area. Studies have shown varying results. This document proposes a methodology for isolating the location and reasons for IPv6 Extension Headers blockage. This document outlines the basic framework and set of documents which will follow.},
+}
+@techreport{ietf-6man-hbh-processing-06,
+    number =    {draft-ietf-6man-hbh-processing-06},
+    type =      {Internet-Draft},
+    institution =   {Internet Engineering Task Force},
+    publisher = {Internet Engineering Task Force},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-ietf-6man-hbh-processing/04/},
+        author =    {Bob Hinden and Gorry Fairhurst},
+    title =     {{IPv6 Hop-by-Hop Options Processing Procedures}},
+    pagetotal = 15,
+    year =      2023,
+    month =     mar,
+    day =       11,
+    abstract =  {This document specifies procedures for how IPv6 Hop-by-Hop options are processed. It modifies the procedures specified in the IPv6 Protocol Specification (RFC8200) to make processing of IPv6 Hop-by- Hop options practical with the goal of making IPv6 Hop-by-Hop options useful to deploy and use in the Internet. When published, this document updates RFC8200 and RFC7045.},
+}
+
+
+@techreport{ietf-v6ops-hbh-03,
+    number =    {draft-ietf-v6ops-hbh-03},
+    type =      {Internet-Draft},
+    institution =   {Internet Engineering Task Force},
+    publisher = {Internet Engineering Task Force},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-ietf-v6ops-hbh/03/},
+        author =    {Shuping Peng and Zhenbin Li and Chongfeng Xie and Zhuangzhuang Qin and Gyan Mishra},
+    title =     {{Operational Issues with Processing of the Hop-by-Hop Options Header}},
+    pagetotal = 15,
+    year =      2023,
+    month =     jan,
+    day =       28,
+    abstract =  {This document describes the processing of the Hop-by-Hop Options Header (HBH) in current routers in the aspects of standards specification, common implementations, and default operations. This document outlines reasons why the Hop-by-Hop Options Header is rarely utilized in current networks. In addition, this document describes how HBH Options Header could be used as a powerful mechanism allowing deployment and operations of new services requiring a more optimized way to leverage network resources of an infrastructure. The purpose of this draft is to document reasons why HBH Options Header is rarely used within networks. It motivates the benefits and requirements needed to enable wider use of HBH Options.},
+}
+@techreport{ietf-6man-eh-limits-02,
+    number =    {draft-ietf-6man-eh-limits-02},
+    type =      {Internet-Draft},
+    institution =   {Internet Engineering Task Force},
+    publisher = {Internet Engineering Task Force},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-ietf-6man-eh-limits/01/},
+        author =    {Tom Herbert},
+    title =     {{Limits on Sending and Processing IPv6 Extension Headers}},
+    pagetotal = 19,
+    year =      2023,
+    month =     feb,
+    day =       23,
+    abstract =  {This specification defines various limits that may be applied to receiving, sending, and otherwise processing packets that contain IPv6 extension headers. The need for such limits is pragmatic to facilitate interoperability amongst hosts and routers in the presence of extension headers and thereby increasing the feasibility of deployment of extension headers. The limits described herein establish the minimum baseline of support for use of extension headers in the Internet. If it is known that all communicating parties for a particular commumication, including end hosts and any intermediate nodes in the path, are capable of supporting more than the baseline then these default limits may be freely exceeded.},
+}
+
+
+@misc{nalini-iepg114,
+title = {{IETF 114: Performance and Diagnostic Metrics (PDM) Destination Option Testing Across the Internet}},
+author = " N. Elkins and M. Ackermann and A. Deshpande",
+year = "2022",
+month = "7",
+
+}
+
+ @misc{apnic, title={IPv6 Extension headers revisited}, url={https://blog.apnic.net/2022/10/13/ipv6-extension-headers-revisited/}, journal={APNIC Blog}, publisher={APNIC}, author={Huston, Geoff}, year={2022}, month={Oct}} 
+
+
+ @techreport{ietf-ippm-ioam-ipv6-options-10,
+    number =    {draft-ietf-ippm-ioam-ipv6-options-10},
+    type =      {Internet-Draft},
+    institution =   {Internet Engineering Task Force},
+    publisher = {Internet Engineering Task Force},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-ietf-ippm-ioam-ipv6-options/10/},
+        author =    {Shwetha Bhandari and Frank Brockners},
+    title =     {{In-situ OAM IPv6 Options}},
+    pagetotal = 11,
+    year =      2023,
+    month =     feb,
+    day =       28,
+    abstract =  {In-situ Operations, Administration, and Maintenance (IOAM) records operational and telemetry information in the packet while the packet traverses a path between two points in the network. This document outlines how IOAM data fields are encapsulated in IPv6.},
+}
+
+@article{v6adoption,
+author = {Czyz, Jakub and Allman, Mark and Zhang, Jing and Iekel-Johnson, Scott and Osterweil, Eric and Bailey, Michael},
+title = {Measuring IPv6 Adoption},
+year = {2014},
+issue_date = {October 2014},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {44},
+number = {4},
+issn = {0146-4833},
+url = {https://doi.org/10.1145/2740070.2626295},
+doi = {10.1145/2740070.2626295},
+journal = {SIGCOMM Comput. Commun. Rev.},
+month = {aug},
+pages = {87–98},
+numpages = {12},
+}
+
+
+@ARTICLE{v6adoption_ton,
+  author={Nikkhah, Mehdi and Guérin, Roch},
+  journal={IEEE/ACM Transactions on Networking}, 
+  title={Migrating the Internet to IPv6: An Exploration of the When and Why}, 
+  year={2016},
+  volume={24},
+  number={4},
+  pages={2291-2304},
+  doi={10.1109/TNET.2015.2453338}}
+
+  
+@misc{rfc9288,
+    series =    {Request for Comments},
+    number =    9288,
+    howpublished =  {RFC 9288},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC9288},
+    url =       {https://www.rfc-editor.org/info/rfc9288},
+        author =    {Fernando Gont and Will (Shucheng) LIU},
+    title =     {{Recommendations on the Filtering of IPv6 Packets Containing IPv6 Extension Headers at Transit Routers}},
+    pagetotal = 33,
+    year =      2022,
+    month =     aug,
+  }
+
+
+
+@article{router-architecture,
+author = {Aweya, James},
+title = {IP router architectures: an overview},
+journal = {International Journal of Communication Systems},
+volume = {14},
+number = {5},
+pages = {447-475},
+doi = {https://doi.org/10.1002/dac.505},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/dac.505},
+year = {2001}
+}
+
+@article{naagas2021deh,
+  title={DEH-DoSv6: A defendable security model against IPv6 extension headers denial of service attack},
+  author={Naagas, Marlon A and Malicdem, Alvin R and Palaoag, Thelma D},
+  journal={Bulletin of Electrical Engineering and Informatics},
+  volume={10},
+  number={1},
+  pages={274--282},
+  year={2021}
+}
+
+
+@techreport{cisco-silicon-one,
+     title = {{Cisco Silicon One Product Family}},
+     author = {Cisco Systems},
+     year = {2022},
+     institution = {Cisco Systems Inc.},
+}
+
+@misc{rfc8250,
+    series =    {Request for Comments},
+    number =    8250,
+    howpublished =  {RFC 8250},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC8250},
+    url =       {https://www.rfc-editor.org/info/rfc8250},
+        author =    {Nalini Elkins and Rob Hamilton and Michael Ackermann},
+    title =     {{IPv6 Performance and Diagnostic Metrics (PDM) Destination Option}},
+    pagetotal = 30,
+    year =      2017,
+    month =     sep,
+    
+}
+
+@misc{rfc9343,
+    series =    {Request for Comments},
+    number =    9343,
+    howpublished =  {RFC 9343},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC9343},
+    url =       {https://www.rfc-editor.org/info/rfc9343},
+        author =    {Giuseppe Fioccola and Tianran Zhou and Mauro Cociglio and Fengwei Qin and Ran Pang},
+    title =     {{IPv6 Application of the Alternate-Marking Method}},
+    pagetotal = 20,
+    year =      2022,
+    month =     dec,
+    abstract =  {This document describes how the Alternate-Marking Method can be used as a passive performance measurement tool in an IPv6 domain. It defines an Extension Header Option to encode Alternate-Marking information in both the Hop-by-Hop Options Header and Destination Options Header.},
+}
+
+@article{bajpai2015lessons,
+  title={{Lessons learned from using the RIPE Atlas platform for measurement research}},
+  author={Bajpai, Vaibhav and Eravuchira, Steffie Jacob and Sch{\"o}nw{\"a}lder, J{\"u}rgen},
+  journal={ACM SIGCOMM Computer Communication Review},
+  volume={45},
+  number={3},
+  pages={35--42},
+  year={2015},
+  publisher={ACM New York, NY, USA}
+}
+
+@inproceedings{learmonth2016pathspider,
+  title={PATHspider: A tool for active measurement of path transparency},
+  author={Learmonth, Iain R and Trammell, Brian and Kuhlewind, Mirja and Fairhurst, Gorry},
+  booktitle={Proceedings of the 2016 Applied Networking Research Workshop},
+  pages={62--64},
+  year={2016}
+}
+
+@inproceedings{augustin2006avoiding,
+  title={{Avoiding traceroute anomalies with Paris traceroute}},
+  author={Augustin, Brice and Cuvellier, Xavier and Orgogozo, Benjamin and Viger, Fabien and Friedman, Timur and Latapy, Matthieu and Magnien, Cl{\'e}mence and Teixeira, Renata},
+  booktitle={6th ACM SIGCOMM conference on Internet measurement},
+  pages={153--158},
+  year={2006}
+}
