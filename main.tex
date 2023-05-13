@@ -125,36 +125,29 @@ Finally the conclusion summarises our findings.
 
 
 IPv6~\cite{rfc2460} introduces a flexible header structure consisting of a
-fixed-length header followed by optional Extension Headers (EHs).  Types of
-extension headers include Hop-by-Hop Options (HbH), Routing, Fragment, and
+fixed-length base header followed by optional Extension Headers (EHs). 
+The type of the very first EH in the chain is specified in the Next Header field of the IPv6 base header, and each consecutive EH contains a Next Header field to specify the type of the next EH in the chain or the presence of an IPv6 payload. Each EH also contains a Length field specifying its total length.
+Types of EHs include Hop-by-Hop Options (HbH Opts), Routing, Fragment, and
 Destination Options (Dest Opts).  RFC 8200~\cite{RFC8200} allows any sequence
 of EHs in a single packet as long as they can fit the first fragment in case of
 fragmentation.
 
-Dest Opts are meant to be consumed at the destination, and should be propagated
-transparently by intermediate nodes. All the other EHs, instead, carry
+Dest Opts are meant to be consumed at the destination, and propagated
+transparently by intermediate devices on a given path. All the other EHs, instead, carry
 information relevant to packet forwarding and should be processed along the
 path. To simplify processing by routers, RFC 8200 also requires inserting HbH
-Options immediately after the base header.
+Opts immediately after the base header.
 
-Figure~\ref{fig:eh-format} shows the structure of an IPv6 packet including base
-header, EHs, and payload.  Each EH uses the same Type-Length-Value (TLV)
-encoding~\cite{RFC8200} with 1~byte allocated for the Type and Length fields
-and a variable-size Value field to carry option data. Altough EHs are variable
-size headers, their length is always a multiple of 8 bytes to preserve
-alignment. 
+Figure~\ref{fig:eh-format} shows the structure of an IPv6 packet including a base
+header followed by a HbH Options EH containing two Options.  Each Option uses the same Type-Length-Value (TLV) encoding~\cite{RFC8200} with 1~byte each allocated for the Type and Length fields and a variable-size Value field to carry option data. Altough EHs are variable size headers, their length is always a multiple of 8 bytes to preserve alignment.
 
-The Type field, also known as Next Header, specifies the type of the next
-EH or the presence of a IPv6 payload. The type of the first EH
-is instead specified in the base header.
-
-Encoding the Type and Length fields in a fixed-length container allows an IPv6
-device to find the next EH even if it does not understand the option. In
+Encoding the Type and Length fields using fixed-length allows an IPv6
+router to skip options it does not understand. In
 addition, when an option is unknown, the two most significant bits of the Type
 specify the action the device should take to address the unrecognised header.
 In particular, if the two most significant bits are 00, the device should
 ignore the option and continue processing the header. If these bits are 01, the
-processing should stop and the packet should be discared. If the bits are 10,
+processing should stop and the packet discared. If the bits are 10,
 the packet should be discarded and an ICMP notification should be returned to
 the sender. Finally, if the bits are 11, the same actions as 10 should occur
 but the notification should be sent only if the destination address was not
@@ -164,6 +157,25 @@ Table~\ref{tbl:options} presents the options currently standardised.  We note
 that the most common choice options is to set the two most significant bits
 (MSBs) to 00.  The third most significant bit instead specifies, if set, 
 that the option data field can be modified en route.
+
+
+Because they can be modified individually by network devices on a path, packets
+with HbH Opts have measurement applications within a network domain. They can
+be used in place of traditional mechanisms for measurement that rely on ICMP:
+Option 0x30 has been defined as alternative to PMTUD~\cite{rfc9268}, option
+0x12 has been specified to measure packet loss, latency, and jitter on live
+traffic measurements~\cite{rfc9343} and recently-proposed option 0x31 records
+operational and telemetry information that can be updated by devices on the
+path between two endpoints. Dest Opts can provide some similar functionality
+between endpoints - option 0x0F~\cite{rfc8250} can be used to measure
+performance and diagnostic metrics like round-trip delay.  Other applications
+for packets with HbH Opts include improving the reliability of packet
+forwarding in lossy networks.
+
+Originally all devices on a path were required to examine and process the HbH
+Opts header~\cite{rfc2460}. This requirement was updated by~\cite{RFC8200} to
+only apply to devices that have been explicitly configured to process it.
+
 
 % The total EH length is 8-byte aligned and specified in the
 % EH Length field, while each individual option declares its own length in the
@@ -195,54 +207,45 @@ Hex  & MSBs & Type      & Description                                           
 \end{table}
 
 
-\subsection{Previous Studies of IPv6 EH}
+\subsection{Previous Studies of IPv6 EHs}
 
 \label{sec:motivation}
 
-The debate on the actual path traversal rates of IPv6 packets with EHs is not
-new to the Internet community.
+The debate on the whether or not IPv6 packets with EHs traverse the Internet is not new to the Internet community.
 
 In 2015, an Informational IETF document presenting traceroute active
 measurements to destinations within the Alexa top 1M domains~\cite{RFC7872}
-revealed that packets with EHs experience significant higher drops over the
+revealed that packets with EHs experience significantly higher drops over the
 Internet than packets without EHs. Since then, other
-studies~\cite{james}~\cite{nalini-iepg114}~\cite{apnic} have appeared in
-support of this claim and the low adoption of emerging EH standards.  However,
+studies~\cite{james}~\cite{nalini-iepg114}~\cite{apnic} have appeared within the standards community in
+support of this claim.  However,
 the level and nature of the reported disruption varied significantly in these
-documents.  This called for more analysis into the causes of the limited EH
-support and the definition of new investigation methods
-~\cite{james}~\cite{elkins-v6ops-eh-deepdive-fw-01}.  
+reports.  This called for more analysis into the causes of the limited EH
+support and the definition of new investigation methods~\cite{james}~\cite{elkins-v6ops-eh-deepdive-fw-01}.  
 
 A recent IETF draft~\cite{elkins-v6ops-eh-deepdive-fw-01} proposes a new
 methodology for isolating the reasons behind EH packet drops and pinpoint the
-responsible devices. This draft focusses particularly on cases where the tested
-server is behind a CDN (Content Delivery Network) and cannot be probed from
-outside.  While no measurement are included in this document, the authors
-reported separately on a successful FTP experiment with enabled Dest Opts
-between 6 vantage points~\cite{nalini-iepg114}.
+responsible devices. This draft focuses particularly on cases where the tested
+server is behind a CDN (Content Delivery Network).  While no measurement are included in this document, the authors reported separately on a successful FTP experiment with enabled Dest Opts between 6 vantage points~\cite{nalini-iepg114}.
 
 Another recent IETF draft, Just Another Measurement of Extension header
-Survivability (JAMES)~\cite{james}, presents results on EH traversal using
-traceroute measurements over a mesh network with 21 vantage points located in
-as many Autonomous Systems (ASes). This study tests all standardised EHs
+Survivability (JAMES)~\cite{james}, presents results on EH path traversal using
+traceroute measurements over a mesh network with 21 vantage points located in globally distributed Autonomous Systems (ASes). This study tests all standardised EHs
 (including Routing, Fragment, etc.) in a setting where both ends of the
 communication path are under the control of the researcher.  The study found
 that only 8-9\% of path support an 8B HbH Option, and a 97\% traversal for 8B
 Dest Opts, with traversal rates decreasing as the size of the EH
-increases~\cite{james-imc}.  Unfortunately, 6 of the 21 vantage points were
+increases~\cite{james-imc}.  We note 6 of the 21 vantage points were
 hosted by Digital Ocean\texttrademark, a Cloud provider that does not support
 HbH Options through their networks.
 
 An innovative measurement methodology to analyse end-to-end path traversal
 rates of Fragmentation, HbH and Dest Opts was introduced by engineers in
-APNIC~\cite{apnic}.  This technique consists in initiating connections from
-clients using a crowd-sourced approach. Hence, the servers perform end-to-end
-measurements by replying with packets including an EH.  APNIC reports a volume
-of 4M measurements/day, spanning a large proportion of IPv6. Their findings
-show a path traversal rate of less than 50\% for Dest Opts and close to zero
-for HbH Opts.  Unfortunately, all measurements were performed from servers in a
-single Cloud provider (Linode), whose shortcomings are discussed in
-Section~\ref{sec:discussion}. 
+APNIC~\cite{apnic}.  This technique consists in initiating TCP connections from
+clients using a crowd-sourced approach and perform end-to-end
+measurements by replying with packets including an EH. If the client then replies to the EH packet, the test is considered successful.  APNIC reports a volume of 4M measurements/day from clients across most of the IPv6 internet. Their findings show clients reply 50\% of the time for Dest Opts and close to zero for HbH Opts. We note that this test does not simply measure traversal over Internet paths, but also whether or not end-user devices reply to a packet with Options. 
+%We also note that all measurements were performed from servers in a
+%single Cloud provider (Linode).
 
 % The different results outlined above present conflicting views, representative
 % of the complex nature of Internet paths. We argue the differences are explained
@@ -272,47 +275,42 @@ Our large-scale measurement study complement previous analysis in that not only
 looks at the end-to-end support in servers, but also provides comparative path
 analysis and longitudinal changes for HbH and Dest Opts EHs.
 
-\subsection{Challenges with IPv6 EHs}
-
-\textbf{POSSIBLY MOVE THIS SECTION BELOW}
+\subsection{Challenges and Operational Considerations}
 
 The parsing of IPv6 packets with EHs depends on a device implementation and
-architecture. In the early Internet, packet routers were implemented entirely
-in software, and as the Internet grew packet processing was moved from software
-to Application Specific Integrated Circuits (ASICs), while the control
-functions remained~\cite{router-architecture}. Routers started having a split
-architecture with a control and forwarding plane~\cite{RFC3654}, corresponding
-to router-critical operations running in software and hardware processing
-respectively. In this architecture, incoming packets can be processed on the
-``fast path" in the forwarding plane on an ASIC or sent for processing over an
-internal link on the ``slow path", or the control plane of a router. As IPv6
-emerged, ASIC support for it was limited, and IPv6 deployment itself was in its
-infancy - and many network device architectures processed packets containing
-IPv6 EHs on the slow path~\cite{ietf-v6ops-hbh-03}.  This resulted in opening
-these routers up to DoS attacks~\cite{naagas2021deh}, because clients sending a
-large amount of IPv6 traffic with EHs could affect a router's control plane
-functions where no rate-limiting of such packets was available. This steered
+architecture. As the Internet emerged and became widespread, routers started having a split architecture with a control and forwarding plane~\cite{RFC3654}, corresponding to router-critical operations running in software and hardware processing respectively.
+%In this architecture, incoming packets can be processed on the ``fast path" in the forwarding plane on an Application Specific Integrated Circuits (ASIC) or sent for processing over an internal link on the ``slow path", or the control plane of a router. 
+
+As IPv6 emerged, many network device architectures processed packets containing IPv6 EHs in the ``slow path"~\cite{ietf-v6ops-hbh-03}.  This resulted in opening these routers up to DoS attacks~\cite{naagas2021deh}, as clients sending a large amount of IPv6 traffic with EHs could affect a router's control plane functions where no rate-limiting of such packets was available. This steered
 network operators to configure their devices to discard packets containing EHs,
-in particular the HbH Opts EH, which the authors of~\cite{ietf-v6ops-hbh-03}
-argue has in turn led the standards community to stop defining new HbH
-Opts~\cite{ietf-v6ops-hbh-03}.
+in particular the HbH Opts EH~\cite{ietf-v6ops-hbh-03}. This filtering remains a challenge to EHs deployment.
 
-However, since its standardisation in the late nineties, the IPv6 protocol has
-seen widespread adoption~\cite{v6adoption_ton} and the hardware and software to
-support it have matured: packet lookup capacity in routers is increasing and
-router architectures have evolved, with solutions based on re-configurable
-logic circuits that allow specific and dedicated functions now
-emerging~\cite{cisco-silicon-one}.
+Another existing challenge relates to implementations within network devices that need to identify the upper-layer protocol header of a packet. This
+requires parsing the entire IPv6 header chain from the base header to
+the last EH. These devices are common in the network domain edge,
+and include routers implementing Access Control Lists (ACLs) or Equal Cost
+Multipath Routing (ECMP), and equipment that performs functions such as
+application load balancing, Multifield (MF) classification, deep packet
+inspection (DPI) or Denial of Service (DoS) attack mitigation. These devices may also discard packets with EHs due to buggy implementations or security considerations.
 
-Updates have also been made to the IPv6 standard itself based on this
-operational
-experience~\cite{RFC5722}~\cite{RFC6734}~\cite{RFC6564}~\cite{RFC8200}. These
-improvements continue as EH processing has become a recent focus in the
-standards community, aiming to motivate a change in both network operator
-policies and the implementation of more resilient router architectures that
-facilitate EH processing~\cite{ietf-6man-hbh-processing-06, ietf-v6ops-hbh-03,
-ietf-6man-eh-limits-02}.  The rest of this section describes the HbH and Dest
-Opts EHs, and outlines some operational considerations for their use.
+
+A different set of considerations applies to network devices that operate in the Internet core, which typically do not require any flow information.
+RFC 9288~\cite{rfc9288} produced a set of recommendations for transit routers. While the document recommends permitting packets with the Dest Opts EH, for HbH Opts, the recommendation is to allow the forwarding of packets where they can be forwarded on the fast path, or where on the slow path as long as rate-limiting is available. Where no mitigation options are present, the recommendation is to discard packets containing these headers. 
+
+%In the early Internet, packet routers were implemented entirely
+%in software, and as the Internet grew packet processing was moved from software
+%to Application Specific Integrated Circuits (ASICs), while the control
+%functions remained~\cite{router-architecture}. Routers started having a split
+%architecture with a control and forwarding plane~\cite{RFC3654}, corresponding
+%to router-critical operations running in software and hardware processing
+%respectively. 
+%In this architecture, incoming packets can be processed on the
+%``fast path" in the forwarding plane on an ASIC or sent for processing over an
+%internal link on the ``slow path", or the control plane of a router. 
+
+%As IPv6 emerged, ASIC support for it was limited, and IPv6 deployment itself was in its infancy - and many network device architectures processed packets containing IPv6 EHs in software~\cite{ietf-v6ops-hbh-03}.  This resulted in opening these routers up to DoS attacks~\cite{naagas2021deh}, because clients sending a large amount of IPv6 traffic with EHs could affect a router's control plane functions where no rate-limiting of such packets was available. This steered
+%network operators to configure their devices to discard packets containing EHs,
+%in particular the HbH Opts EH~\cite{ietf-v6ops-hbh-03}.
 
 %https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7949061
 
@@ -339,45 +337,10 @@ Opts EHs, and outlines some operational considerations for their use.
 % Please add the following required packages to your document preamble:
 
 
-Because they can be modified individually by network devices on a path, packets
-with HbH Opts have measurement applications within a network domain. They can
-be used in place of traditional mechanisms for measurement that rely on ICMP:
-Option 0x30 has been defined as alternative to PMTUD~\cite{rfc9268}, option
-0x12 has been specified to measure packet loss, latency, and jitter on live
-traffic measurements~\cite{rfc9343} and recently-proposed option 0x31 records
-operational and telemetry information that can be updated by devices on the
-path between two endpoints. Dest Opts can provide some similar functionality
-between endpoints - option 0x0F~\cite{rfc8250} can be used to measure
-performance and diagnostic metrics like round-trip delay.  Other applications
-for packets with HbH Opts include improving the reliability of packet
-forwarding in lossy networks.
 
-Originally all devices on a path were required to examine and process the HbH
-Opts header~\cite{rfc2460}. This requirement was updated by~\cite{RFC8200} to
-only apply to devices that have been explicitly configured to process it. If
-present, the HbH Opts header must immediately follow the IPv6 header. 
+%\subsection{Operational considerations}
 
-
-\subsection{Operational considerations}
-
-\textbf{POSSIBLY MOVE THIS SECTION BELOW}
-
-Some network devices need to identify the upper-layer protocol header. This
-requires parsing the entire IPv6 header chain from the mandatory IPv6 header to
-the last extension header. These devices are common in the network domain edge,
-and include routers implementing Access Control Lists (ACLs) or Equal Cost
-Multipath Routing (ECMP), and equipment that performs functions such as
-application load balancing, Multifield (MF) classification, deep packet
-inspection (DPI) or Denial of Service (DoS) attack mitigation.
-
-On the other hand, network equipment that operates in the Internet core does
-not require any flow information. RFC 9288~\cite{rfc9288} produced a set of
-recommendations for transit routers. For HbH Opts, the recommendation is to
-allow the forwarding of packets where they can be forwarded on the fast path,
-or where on the slow path as long as rate-limiting is available. For network
-devices that can only process these in the slow path without any mitigation
-options available, the recommendation is to discard packets containing these
-headers. The document recommends permitting packets with the Dest Opts EH.
+%\textbf{POSSIBLY MOVE THIS SECTION BELOW}
 
 
 
@@ -411,10 +374,10 @@ Experiment setups are discussed in the next subsections.
 
 Datasets R1-R3 in Table~\ref{tbl:datasets} were collected using RIPE Atlas~\cite{bajpai2015lessons}.
 The RIPE Atlas measurement platform was chosen for this study due to its large number of IPv6 vantage points and its ability to perform Paris Traceroute measurements with the PadN Option defined for the Dest and HbH EHs. This option was defined in the original IPv6 standard and its purpose is to pad an EH to ensure 8B alignment, and so is expected to be recognised by most IPv6 implementations.
-RIPE Atlas supports setting the size for both types of EHs when performing measurements. At the time of writing, the platform provides 5464 IPv6 vantage points (probes) across 644 unique Autonomous System Numbers, spanning a range of commercial ISPs and R\&E access networks. The number of probes available fluctuates as volunteer-run probes can become disconnected over time.
+RIPE Atlas supports setting the size for both types of EHs when performing measurements. At the time of writing, the platform provides 5464 IPv6 vantage points (probes) across 644 unique Autonomous System Numbers, spanning a range of commercial ISPs and R\&E access networks. The number of probes available fluctuates as volunteer-run probes in edge networks can become disconnected over time.
 
 We collected traceroutes from all available vantage points on the platform, using both Dest and HbH Opts EHs of 8 Bytes in size, and in each case using UDP and TCP as the underlying transport, to 7 different globally distributed target servers (Dataset R1), without varying the source port and flow label. Baseline UDP and TCP measurements using vanilla IPv6 packets (without an EH) were also collected for each target.
-A separate experiment keeps the destination country fixed, but varies the transport and size of EH between 8 and 64B.
+A separate experiment keeps the destination country fixed, but varies the transport and size of EH between 8 and 64B (Dataset R2).
 
 Finally, we use RIPE Atlas to perform Paris Traceroute~\cite{augustin2006avoiding} measurements, aiming to detect whether using an EH impacts the path taken between a vantage point and destination. We only select vantage points where traversal is successful over UDP for both types of tested EH to a specific target, ensuring a total of 866 complete paths are measured.
 We measure these paths using vanilla IPv6 packets, and packets carrying 8 Bytes Dest and HbH Opts EHs. Each measurement is repeated 16 times, with each repetition varying the source port and flow label of the traceroute packets. Each repetition is assigned a Paris ID to identify it. Finally, we repeat each set of 16 Paris measurements 5 times (Dataset R3).
@@ -729,6 +692,18 @@ Traffic flows that mix packets with options and packets without options must tak
 
 \section{Conclusion}
 \label{sec:conclusion}
+
+
+However, since its standardisation in the late nineties, the IPv6 protocol has
+seen widespread adoption~\cite{v6adoption_ton} and the hardware and software to
+support it have matured: packet lookup capacity in routers is increasing and
+router architectures have evolved, with solutions based on re-configurable
+logic circuits that allow specific and dedicated functions now
+emerging~\cite{cisco-silicon-one}.
+
+Updates have also been made to the IPv6 standard itself based on this
+operational experience~\cite{RFC5722}~\cite{RFC6734}~\cite{RFC6564}~\cite{RFC8200}. These improvements continue as EH processing has become a recent focus in the standards community, aiming to motivate a change in both network operator policies and the implementation of more resilient router architectures that facilitate EH processing~\cite{ietf-6man-hbh-processing-06, ietf-v6ops-hbh-03, ietf-6man-eh-limits-02}. 
+
 
 \bibliographystyle{abbrv}
 \small
