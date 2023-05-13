@@ -34,86 +34,78 @@
 \maketitle
 
 \begin{abstract}
-The Hop-by-Hop Options and Destination Options Extension Headers have historically faced challenges in deployment due to the lack of support in hardware-based forwarding and concerns around potential denial-of-service attacks. However, there has been a renewed interest within the standards community both in simplifying their processing, and in using them for new applications. 
+The IPv6 Hop-by-Hop Options and Destination Options Extension Headers have historically faced challenges in deployment due to the lack of support in hardware-based forwarding and concerns around potential denial-of-service attacks. However, there has been a renewed interest within the standards community both in simplifying their processing, and in using them for new applications. 
 Through a wide-scale measurement campaign, we show that many Autonomous Systems (ASes) in access networks and core of the Internet permit the traversal of EHs carrying options, and that path traversal is highly variable depending on the type of network, size of option and transport protocol used, but not on the type of option sent. We also show that packets with Extension Headers can impact load balancing network functions, and present evidence of equipment misconfiguration. Finally we outline the remaining deployment challenges for the EHs and provide recommendations for utilizing them.
 
 \end{abstract}
 
 \begin{IEEEkeywords}
-IPv6 Options, Destination Options, Hop-by-Hop Options, IP protocol
+IPv6 protocol, Extension Headers, Protocol Evolution
 \end{IEEEkeywords}
 
 \section{Introduction}
 \label{sec:introduction}
 
-IPv6 Extension Headers (EHs)~\cite{RFC8200} are optional headers 
-added to the basic IPv6 header that provide extra functionality and features in
-IPv6 networks.  The use of extension headers allows for a flexible and
-extensible design of IPv6 that can support a variety of new networking
-features and technologies.
- 
+IPv6 Extension Headers (EHs)~\cite{RFC8200} are optional headers that can be 
+added to the base IPv6 header to provide extra functionality and features in
+IPv6 networks. They were included in the original IPv6 specification
+to make the protocol flexible and extensible.
+%The use of extension headers allows for a flexible and extensible design of IPv6 that can support a variety of new networking features and technologies.
+% commented out as it does not say much
 Despite the potential benefits of IPv6 EHs, studies have shown that their use
-has not been widespread~\cite{rfc9098}. A reason often cited for this is that some
+has not been widespread~\cite{rfc9098}. A reason often cited for this is that many
 network devices, such as firewalls and routers, do not properly handle packets
 containing extension headers, which can cause interoperability issues.
-Additionally, some network administrators may be hesitant to enable extension
-headers due to security concerns, as they can potentially be used to bypass
-security mechanisms or launch attacks~\cite{naagas2021deh}.
+Additionally, some network administrators may firewall extension
+headers due to security concerns, as they have historically been used to bypass
+security mechanisms or launch Denial of Service (DoS) attacks~\cite{naagas2021deh}.
 
-A plausible process that has resulted in the limited usage of IPv6 extension
-headers (EHs) has recently been described in an IETF
-document~\cite{ietf-v6ops-hbh-03}. Authors claims  that early routers
-predominantly processed EHs in software, as ASIC implementations of processing
-of IPv6 extensions were scarce. Consequently, the processing of EHs occurred
-primarily in the control plane of routers, where longer processing times
-(slow-path) were needed for hop-by-hop extensions. Ultimately, this led to an
-increase of per-packet processing time and a decrease in throughput.  To
-overcome this challenge, routers began disabling the processing of extension
-headers, or even dropping packets with EHs altogether.  In turn, this
-discouraged the development of new extension headers and further integration
+A plausible process that has resulted in the limited usage of IPv6 EHs
+has recently been described in a draft Internet standard~\cite{ietf-v6ops-hbh-03}. Authors claims  that early routers
+predominantly processed EHs in software, as ASIC implementations for processing
+them were scarce. Consequently, the processing of EHs occurred
+primarily in the control plane of routers, requiring longer processing
+(slow-path) and computing times, and leading to a decrease in throughput.  To
+overcome this challenge, network operators began to disable EH processing in their
+networks, or even dropping packets with EHs altogether.  In turn, this
+discouraged their development within the standards community and further integration
 with other network technologies.
 
 Taking this viewpoint into account, this paper demonstrates the wider
 accessibility of EH processing in modern routers. By utilising results from two
 extensive measurement campaigns, we illustrate that IPv6 routers are now more
 capable in handling EHs.  However, our findings also reveal
-that there are still prevalent pathologies in certain Internet areas that could
-hinder the widespread adoption of IPv6 EHs if not addressed.
+that there are still prevalent pathologies in certain Internet areas that challenge the further adoption of IPv6 EHs.
 
 This paper begins by discussing various separate measurements reporting
 potentially contrasting results on IPv6 path traversal rates~\cite{RFC7872}
 \cite{apnic} \cite{nalini-iepg114} \cite{james}.  Discrepancies in individual
-studies are here attributed to either too narrow datasets or an excessive focus
+studies are here attributed to either too narrow datasets or a focus
 on overly specific scenarios.  With the use of broader datasets and the
 consideration of various factors, including packet lengths, header lengths,
 transport type, and packet composition, we paint a more diverse and nuanced
-picture of internet paths than was previously thought.
+picture of Internet paths than was previously thought.
 
 Specifically, our research demonstrates that if the EHs are limited in size,
-the path traversal rate of packet carrying Destination Options can be as
-high as 90\% across a diverse set of Internet paths. However, the path
-traversability of Hop-by-Hop EHs remains restricted. On the other hand, when we
-characterise Autonomous Systems (AS) traversability, if we exclude sporadic
-cases with IP-in-IP tunnels  or specific policies in acceess networks, the vast
-majority of ASes allow transparent forwarding of EHs.
+packets carrying Destination Options can traverse as many as
+95\% of a diverse set of Internet paths. However, packets carrying a Hop-by-Hop Options EH only traverse a very narrow set of paths. On the other hand, when we
+characterise whether these packets traverse Autonomous Systems (AS), if we exclude operator policies in access and transit networks, we find many ASes allow transparent forwarding of EHs.
 
-This paper also presents novel insights on how the use of EHs in packet compositions
-impacts the routing process from source to destination. Our research findings
-demonstrate that the inclusion of EHs in packets of the same flow results in a
-broader distribution of routing paths. Although one could interpret this  as an
+This paper also presents novel insights into how the inclusion of EHs in packets
+impacts the forwarding process from source to destination. Our research findings
+demonstrate that the inclusion of EHs in packets on paths with some form of network layer load-balancing often results in a narrower set of forwarding paths. Although one could interpret this as an
 alternative approach to extracting entropy from EHs, it is more likely a
-pathological outcome of front-end load balancing systems not properly equipped
+pathological outcome of load balancing network devices not properly equipped
 to handle packets carrying EHs.
 
 We claim that eliminating these pathologies would open up opportunities for
-the standards community to propose a range of innovative ideas based on EHs.
-Such proposals include sending larger packets~\cite{rfc9268} and monitoring network
+developers and network operators to take advantage of a range of recently-standardised or in-progress innovative ideas based on EHs, such as sending larger packets~\cite{rfc9268} or monitoring network
 performance~\cite{rfc8250}~\cite{ietf-ippm-ioam-ipv6-options-10}.
 
-The rest of the paper is so organised.  Section~\ref{sec:background} presents
+The rest of the paper is organised as follows:  Section~\ref{sec:background} presents
 the required background on IPv6 EHs and the historical challenges related to
-its deployment.  The previous literature on Internet wide measurement of IPv6
-EHs is surveyed in Section~\ref{sec:motivation}.
+their deployment.  The previous literature on IPv6
+EH measurements of is surveyed in Section~\ref{sec:motivation}.
 Sections~\ref{sec:methodology}-\ref{sec:pathspider-results} present the
 methodology and results of this study, organised by type of network path.  The
 implications of our results are discussed in Section~\ref{sec:discussion}.
