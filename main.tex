@@ -376,23 +376,22 @@ Datasets R1-R3 in Table~\ref{tbl:datasets} were collected using RIPE Atlas~\cite
 The RIPE Atlas measurement platform was chosen for this study due to its large number of IPv6 vantage points and its ability to perform Paris Traceroute measurements with the PadN Option defined for the Dest and HbH EHs. This option was defined in the original IPv6 standard and its purpose is to pad an EH to ensure 8B alignment, and so is expected to be recognised by most IPv6 implementations.
 RIPE Atlas supports setting the size for both types of EHs when performing measurements. At the time of writing, the platform provides 5464 IPv6 vantage points (probes) across 644 unique Autonomous System Numbers, spanning a range of commercial ISPs and R\&E access networks. The number of probes available fluctuates as volunteer-run probes in edge networks can become disconnected over time.
 
-We collected traceroutes from all available vantage points on the platform, using both Dest and HbH Opts EHs of 8 Bytes in size, and in each case using UDP and TCP as the underlying transport, to 7 different globally distributed target servers (Dataset R1), without varying the source port and flow label. Baseline UDP and TCP measurements using vanilla IPv6 packets (without an EH) were also collected for each target.
-A separate experiment keeps the destination country fixed, but varies the transport and size of EH between 8 and 64B (Dataset R2).
+We collected traceroutes from all available vantage points on the platform, using both Dest and HbH Opts EHs of 8 Bytes in size, and in each case using UDP and TCP as the underlying transport, to 7 different globally distributed target servers (dataset R1), without varying the source port and flow label. Baseline UDP and TCP measurements using vanilla IPv6 packets (without an EH) were also collected for each target.
+A separate experiment keeps the destination country fixed, but varies the transport and size of EH between 8 and 64B (dataset R2).
 
 Finally, we use RIPE Atlas to perform Paris Traceroute~\cite{augustin2006avoiding} measurements, aiming to detect whether using an EH impacts the path taken between a vantage point and destination. We only select vantage points where traversal is successful over UDP for both types of tested EH to a specific target, ensuring a total of 866 complete paths are measured.
-We measure these paths using vanilla IPv6 packets, and packets carrying 8 Bytes Dest and HbH Opts EHs. Each measurement is repeated 16 times, with each repetition varying the source port and flow label of the traceroute packets. Each repetition is assigned a Paris ID to identify it. Finally, we repeat each set of 16 Paris measurements 5 times (Dataset R3).
+We measure these paths using vanilla IPv6 packets, and packets carrying 8 Bytes Dest and HbH Opts EHs. Each measurement is repeated 16 times, with each repetition varying the source port and flow label of the traceroute packets. Each repetition is assigned a Paris ID to identify it. Finally, we repeat each set of 16 Paris measurements 5 times (dataset R3).
 
 
     \subsection{PATHSpider - server edge paths}
     \label{sec:pathspider-methodology}
 
-We use PATHSpider~\cite{learmonth2016pathspider}, a tool for path transparency testing, to survey IPv6-enabled Domain Name System (DNS) servers over multiple years (2019-2023) from the same vantage point located at the University of Aberdeen. At the time this experiment was started, the targets were the IPv6 authoritative Name Servers (NS) for the then-current Alexa Top 1M domains list, and PATHSpider did not have the capability to perform the test over TCP. The longitudinal dataset (Dataset P1) therefore only presents UDP results, and reuses the same set of domains to avoid changes introduced by continuously tracking a Top 1M Domains list. The domains are resolved again prior to each measurement, and any duplicate or unreachable addresses are removed, resulting in between 19,000 and 22,000 unique IPv6 addresses per measurement. 
-%The test also records whether any ICMP messages are received. This allows us to understand if servers on the path dropping EH packets are configured to send ICMP Unreachable messages.
+We use PATHSpider~\cite{learmonth2016pathspider}, a tool for path transparency testing, to survey IPv6-enabled Domain Name System (DNS) servers over multiple years (2019-2023) from the same vantage point located at the University of Aberdeen. At the time this experiment was started, the targets were the IPv6 authoritative Name Servers (NS) for the then-current Alexa Top 1M domains list, and PATHSpider did not have the capability to perform the test over TCP. The longitudinal measurement therefore only presents UDP results, and reuses the same set of domains to avoid changes introduced by continuously tracking a Top 1M Domains list. The domains are resolved again prior to each measurement, and any duplicate or unreachable addresses are removed, resulting in between 19,000 and 22,000 unique IPv6 addresses per measurement.
 
-We extend PATHSpider to support measurements over TCP and repeat this test in 2023 using both transports from 5 globally distributed vantage points using the latest version of Cisco Umbrella Top 1M Domains (19054 unique IP addresses) from all locations. When TCP is measured, the EH is inserted on the first packet (the TCP SYN) and all subsequent packets in the connection.
+We extend PATHSpider to support measurements over TCP and repeat this test in 2023 using both transports from 5 globally distributed vantage points to both DNS and webservers extracted from the latest version of Cisco Umbrella Top 1M Domains (19054 and 232350 unique IP addresses respectively). When TCP is measured, the EH is inserted on the first packet (the TCP SYN) and all subsequent packets in the connection.
+The test also records whether any ICMP messages are received. This allows us to understand if servers on the path dropping EH packets are configured to send ICMP Unreachable messages.
 
-In the latter test, we also vary the Option Type and declared Option Length fields (Dataset P2). This allows us to observe whether different types of options, or incorrectly declared lengths affect EH traversal. For these tests, we also record any ICMP messages received at the sender for a source-destination pair, with the goal of understanding how often ICMP Type 3 (Destination Unreachable) or ICMP Type 4 (Parameter Problem) messages are sent by routers that drop packets carrying an EH. To measure the latter, we ensure one tested Option Types has the highest order bits set to 11, presented in Table~\ref{tbl:options}.
-
+In the latter test, we also vary the Option Type and declared Option Length fields (dataset P2). This allows us to observe whether different types of options, or incorrectly declared lengths affect EH traversal. For these tests, we also record any ICMP messages received at the sender for a source-destination pair, with the goal of understanding how often ICMP Type 3 (Destination Unreachable) or ICMP Type 4 (Parameter Problem) messages are sent by routers that drop packets carrying an EH. To measure the latter, we ensure one tested Option Types has the highest order bits set to 11, presented in Table~\ref{tbl:options}.
 
 For the server-side measurements described above, the targets selected are DNS servers, due to their ability to be surveyed using both UDP and TCP, although we also present traversal results for the webservers underpinning the Cisco Umbrella top 1M domains.
 
@@ -401,22 +400,22 @@ The following section separately presents the RIPE Atlas access network and PATH
 \section{RIPE Atlas results} 
 \label{sec:ripe-results}
 
-This section presents results obtained using the RIPE Atlas measurement platform, using a large number of vantage points and testing a limited number of destinations, of which several are under the control of the researcher. The section primarily reports on the traversal rate, or the percentage of paths where test packets were observed to reach the destination AS. Packets not reaching the destination AS are inferred to be dropped. 
+This section presents results obtained using the RIPE Atlas measurement platform, using up to 5000 vantage points towards 8 destinations, of which half are under the control of the researcher. The section primarily reports on the the percentage of paths where test packets were observed to reach the destination AS (the traversal rate). Packets not reaching the destination AS are inferred to be dropped. 
 
 \subsection{Traversal to destination AS}
 
 %Prior to each test case, a baseline measurement using vanilla packets was carried out and unreachable probes were subsequently removed from the result set. 
 Figure~\ref{fig:countrybox} shows aggregated traversal results measuring targets in 7 different countries: US, UK, Australia, Poland, Zambia, Kazakhstan and Singapore, from an average of 4750 vantage points. This figure demonstrates the type of EH, transport protocol and choice of destination can affect traversal.
 
-A PadN Dest Opts EH of 8 Bytes (B) in size sees a much higher overall traversal rate compared to the same HbH Opts EH. Similarly, the UDP transport protocol sees a higher traversal rate compared to TCP. Packets with Dest Options traverse a median of 83\% of the paths tested over UDP and 57\% over TCP, whilst packets with HbH Options only traverse a median of 12 and 9\% of paths over UDP and TCP respectively.
-Finally, the spread of values for each EH-transport combination seen in Figure~\ref{fig:countrybox} demonstrates that path traversal varies with the chosen destination. TCP stands out due its large variability, spanning traversal percentages as low as 8\% in the case of the Zambian destination and up to 67\% towards the UK destination. We note that in the case of HbH options, traversal doesn't exceed 20\% (UDP) and 17\% (TCP) respectively.
+A PadN Dest Opts EH of 8 Bytes (B) in size sees a much higher overall traversal rate compared to the same HbH Opts EH. Similarly, the UDP transport protocol sees a higher traversal rate compared to TCP. Packets with Dest Opts traverse a median of 83\% of the paths tested over UDP and 57\% over TCP, whilst packets with HbH Opts only traverse a median of 12 and 9\% of paths over UDP and TCP respectively.
+The spread of values for each EH-transport combination seen in Figure~\ref{fig:countrybox} demonstrates that path traversal varies with the chosen destination. TCP stands out due its large variability, spanning traversal percentages as low as 8\% in the case of the Zambian destination and up to 67\% towards the UK destinations. We note that in the case of HbH Opts, traversal doesn't exceed 20\% (UDP) and 17\% (TCP) respectively.
 
-To determine if traversal is based on size, measurements from all vantage points were run to a single target server using EHs of 16, 32, 40, 48, 56 and 64 Bytes in size (Dataset R2). Each option-size-transport combination was tested separately to detect whether drops are based on the size of the EH and whether this is impacted by the choice of transport, for a total of 129,585 measurements.
+To determine if traversal is based on size, measurements were run from all vantage points to a single target server using EHs of 16, 32, 40, 48, 56 and 64 Bytes in size (dataset R2). Each option-size-transport combination was tested separately to detect whether drops are based on the size of the EH and whether this is impacted by the choice of transport, for a total of 129,585 measurements.
 Traversal for each EH size is shown in Figure~\ref{fig:sizes}. We observe that path traversal also depends on size: packets sent with Dest Opts over UDP see the biggest drop in traversal for an EH of 56B in size, dropping from 87\% at 48B to 26\%. Traversal for packets with HbH Opts sees a 2\% dip at 56B and plummets towards 0 at 64B.
-The same pattern shifted by 8B to the left can be seen for packets sent over TCP. Dest Options see the biggest drop for an EH of 48B (from 70\% to 25\%), while HbH sees a 1\% dip at 48B and plummets towards 0 at 56B.
+The same pattern shifted by 8B to the left can be seen for packets sent over TCP. Dest Options see the biggest drop for an EH of 48B (from 70\% to 25\%), while HbH sees a 1\% dip at 48B and nears 0 at 56B.
 
-We attribute the 8B difference in traversal for the transports to the size of the transport header.
-We note that adding the size of the TCP (20B) and IP (40B) headers to a 48B EH results in a total IP and transport header size of 108B, and adding the size of the UDP and IP headers to a 56B EH results in a header size of 104B, and note 108B as an "upper limit" beyond which packets with Options suffer significant drops.
+We attribute the 8B shift in traversal drop for the transports to the size of the transport header.
+We note that adding the size of the TCP (20B) and IP (40B) headers to a 48B EH results in a total IP and transport header size of 108B, and adding the size of the UDP and IP headers to a 56B EH results in a header size of 104B, and note 104B as an "upper limit" beyond which packets with Options suffer significant drops.
 
 \begin{figure}
 \centering
@@ -500,19 +499,19 @@ HbH TCP 8B & 26.9\% & 16.3\%               & 13.9\% & 9.7\%                & 8.6
 
 \subsection{Internet path analysis}
 
-Load balancing routers are another type of on-path devices that can operate on the upper layer headers of a packet. To determine whether this function is impacted by packets with EHs, we perform Paris Traceroute measurements. This tool aims to detect the presence of load balancing on a given path~\cite{augustin2006avoiding}, by performing multiple traceroute measurements varying several header fields (a 'Paris variation'); on-path devices may use several of these fields for load-balancing purposes. To identify the packets sent for a specific measurement, Paris Traceroute relies on  TCP's sequence number field or the checksum field in the case of UDP.
+Load balancing routers are another type of on-path devices that can operate on the upper layer headers of a packet. To determine whether this function is impacted by packets with EHs, we perform Paris Traceroute measurements. This tool aims to detect the presence of load balancing on a given path~\cite{augustin2006avoiding}, by performing multiple traceroute measurements varying several header fields (a `Paris variation'); on-path devices may use several of these fields for load-balancing purposes. To identify the packets sent for a specific measurement, Paris Traceroute relies on  TCP's sequence number field or the checksum field in the case of UDP.
 
-We run 6 sets of measurements from RIPE Atlas vantage points to the Zambian destination, with each set using 16 Paris variations. We carefully select the vantage points and destination based on previous measurements, so as to only measure complete paths, where traversal always succeeds. We find a total of 866 paths. The Paris Traceroute version used by RIPE Atlas varies the IPv6 Flow Label and transport port number deterministically between individual Paris measurements. Each group of 16 Paris measurements is considered a measurement run. The same combinations of IPv6 Flow Label and port number are used for subsequent measurement runs.
+We run 6 sets of measurements from RIPE Atlas vantage points to the Zambian destination, with each set using 16 Paris variations. We carefully select the vantage points and destination based on previous measurements, so as to only measure complete paths, where traversal always succeeds. We find a total of 866 paths. The Paris Traceroute version used by RIPE Atlas varies the IPv6 Flow Label and transport port number deterministically between individual Paris measurements. Each group of 16 Paris measurements is considered a measurement set. The same 16 combinations of IPv6 Flow Label and port number are used for subsequent measurement sets.
 
 \begin{figure}
 \centering
   \includegraphics[width=0.5\textwidth]{boxplot-paths-detected.png}
-  \caption{Number of paths detected by Paris Traceroute in 866 source-destination pairs, averaged over 5 measurement runs, with each run using the same 16 Paris variations. The baseline measurement using vanilla packets is compared against Dest and HbH Opts measurements (Dataset R3).}
+  \caption{Number of paths detected by Paris Traceroute in 866 source-destination pairs, averaged over 5 measurement runs, with each run using the same 16 Paris variations. The baseline measurement using vanilla packets is compared against Dest and HbH Opts measurements (dataset R3).}
   \label{fig:paths-detected}
 \end{figure}
 
-Figure~\ref{fig:paths-detected} compares how many of paths are discovered by Paris Traceroute when using vanilla IPv6 packets versus packets that use an 8B Dest or HbH Opts EH.
-A total 16 Paris variations discover on average 4 paths~\cite{augustin2006avoiding}. We reproduce this in our baseline results, which find a median of 4.1 hops. However, the medians for measurements where packets carried an 8B Dest or HbH Opts EH are 2.96 and 2.1 respectively (Figure~\ref{fig:paths-detected}).
+Figure~\ref{fig:paths-detected} compares how many paths are discovered by Paris Traceroute when using vanilla IPv6 packets versus packets that contain an 8B Dest or HbH Opts EH.
+A total 16 Paris variations discover on average 4 paths~\cite{augustin2006avoiding}. We reproduce this in our baseline results, finding a median of 4.1 paths. However, the medians for measurements where packets carried an 8B Dest or HbH Opts EH are 2.96 and 2.1 respectively (Figure~\ref{fig:paths-detected}).
 
 For 518 (60\%) of source-destination pairs, measurements performed with Dest Opts EHs detect the same (+-1 path) number of paths as the baseline. For 328 (38\%) pairs, the measurements detect fewer (by 1 path or more) number of paths than the baseline. On the other hand, measurements using HbH Opts EHs detect the same (+-1 path) number of paths as the baseline for only 115 (13.4\%) source-destination pairs. Much more commonly, fewer paths are detected when this type of EH is used compared to the baseline. This happens on 604 paths (69.7\%). This pathology could happen, for example, if ECMP-enabled routers use a byte offset for their hash calculations. Overall, this means that packets with an HbH EH are less likely to take the same internet path as a vanilla packet.
 
@@ -532,14 +531,14 @@ This section reports on the end-to-end support, or the percentage of paths where
 \begin{tabular}{c|cc|cc}
 \multicolumn{1}{l|}{} & \multicolumn{2}{c|}{Dest Opts Support} & \multicolumn{2}{c}{HbH Opts Support} \\ \cline{2-5} 
 \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{TCP}       & UDP      & \multicolumn{1}{c|}{TCP}     & UDP     \\ \hline
-UK                    & \multicolumn{1}{c|}{70.8}      & 71.9     & \multicolumn{1}{c|}{11.5}    & 11.9    \\ \hline
-Canada                & \multicolumn{1}{c|}{72.6}      & 72.1     & \multicolumn{1}{c|}{19.9}    & 19.0    \\ \hline
-Australia             & \multicolumn{1}{c|}{75}        & 76       & \multicolumn{1}{c|}{20.3}    & 19.6    \\ \hline
-Singapore             & \multicolumn{1}{c|}{77.2}      & 73.8     & \multicolumn{1}{c|}{25.2}    & 17.4    \\ \hline
-Poland                & \multicolumn{1}{c|}{72.4}      & 72.4     & \multicolumn{1}{c|}{20.7}    & 19.8   
+UK                    & \multicolumn{1}{c|}{69.1}      & 69.3    & \multicolumn{1}{c|}{12.5}    & 15.8  \\ \hline
+Canada                & \multicolumn{1}{c|}{x}      & 76     & \multicolumn{1}{c|}{x}    & 24.2  \\ \hline
+Australia             & \multicolumn{1}{c|}{x}        & 72.2      & \multicolumn{1}{c|}{x}    & 17.5  \\ \hline
+Singapore             & \multicolumn{1}{c|}{x}      & 72.7    & \multicolumn{1}{c|}{x}    & 17.4   \\ \hline
+Poland                & \multicolumn{1}{c|}{x}      & 76.8   & \multicolumn{1}{c|}{x}    & 24.7   
 \end{tabular}
 \label{tbl:e2e_traversal}
-\caption{End-to-end support for an 8B Pad N option for both Dest and HbH EHs, from vantage points in 5 countries to n=20082 unique authoritative NSes in 2787 different known ASes. All measurements performed in December 2022, part of Dataset P1.}
+\caption{End-to-end support for an 8B Pad N option for both Dest and HbH EHs, from vantage points in 5 countries to n=20082 unique authoritative NSes in the Cisco Umbrella Top 1M, in 2787 different known ASes. All measurements performed in February 2023, part of dataset P1. }
 \end{table}
 
 \begin{table}[]
@@ -564,25 +563,41 @@ Ionos      & 3                    & Yes                & No
 \subsection{End-to-end support}
 \label{subsec:e2esupport}
 
-Table~\ref{tbl:e2e_traversal} presents the end-to-end support for the authoritative NSes for the 1M domains list used for longitudinal measurements, alongside support for the current Cisco Umbrella top 1M Domains list published in December 2022.
+Table~\ref{tbl:e2e_traversal} presents the end-to-end support for the authoritative NSes for the current Cisco Umbrella top 1M Domains list (Feb 2023.
+% ANA TODO - double check results^
 
-As with the access network results previously presented, support varies between the Dest and HbH EHs: 70 to 77\% of the tested servers replied to packets using Dest Opts, and up to 25.2\% do so for HbH Opts. Traversal does not vary with transport in the same way seen for the access network results presented in the previous section. We attribute this to the lack of edge router devices normally present in access networks. Only one measurement, from the Singapore vantage point, sees a 5\% difference based on transport in favour of TCP.
-Finally, the table shows variations in support based on vantage point - support varies between 12 to 25.2\% for HbH Opts, indicating fewer packets dropped in transit networks in the latter case.
+As with the access network results previously presented, support varies between the Dest and HbH EHs: 69 to 80\% of the tested servers replied to packets using Dest Opts, and up to 24.2\% do so for HbH Opts. Traversal does not vary with transport in the same way seen for the access network results presented in the previous section. We attribute this to the lack of edge router devices normally present in access networks. Only one measurement, from the Singapore vantage point, sees a 5\% difference based on transport in favour of TCP for both EHs tested.
+Finally, the table shows variations in support based on vantage point - support varies between 12 to 24.7\% for HbH Opts, indicating fewer packets dropped in transit networks in the latter case.
 
 However, around one third of destinations in the DNS dataset featured in Table~\ref{tbl:e2e_traversal} are hosted by a few major hosting companies (Cloudflare, Amazon, Gandi etc.) which employ network policies to filter packets with some EHs in their network. End-server support for major DNS server providers are presented in Table~\ref{tbl:provider_support}. In Early December 2022, Cloudflare servers started responding to DNS queries send over packets with Dest options, resulting in a jump from 57\% to over 70\% for the dataset. If all major providers would enable support, this would bring the success of the E2E test to over 90\% for Dest Opts and 60\% for Hbh Opts for this dataset.
 
-Where testing end-to-end support for webservers in the latest 1M domains, we find this to be very low: between xx and yy for Dest Opts packets and between xx and yy for HbH Opts.
-The list of most visited domains will make use of Content Delivery Networks (CDNs), and CDNs or proxy services which do not carry IPv6 packets to the web server that they front. Moreover, the list of webservers is much more dominated by a few major hosting companies: around xxx\% (40ish percent iirc) are hosted by Cloudflare, which by default does not carry IPv6 packets to the origin server, although they allow this feature to be enabled at extra cost.
+We tested end-to-end support for webservers in the Cisco Umbrella top 1M Domains list (232350 unique IP addresses, Feb 2023) from the same destinations. This list of webservers is much more dominated by a few major hosting companies: around 52\% of destinations are hosted by Amazon Inc (AS16509); 23\% are hosted by Cloudflare (AS13335), and around 2.5\% each are hosted by Akamai Technologies and Google. We break down supported EHs for each in Table~\ref{tbl:web_provider_support}. We find more than two-thrids of Amazon-hosted webservers respond to connections over packets with Dest Opts, in contrast to Amazon-hosted DNS servers, where none do. 
 
-\subsubsection{Traversal}
+Overall, we find end-to-end support for all tested webserver addresses to be between 57 and 68\% for Dest Opts packets and between 1 and 2\% for HbH Opts.
 
-We note that end-to-end support is not the same metric as path traversal. The latter is only concerned to whether packets reach the destination AS. To work out the path traversal for this dataset, we further perform traceroutes to the servers where a reply was not already seen.
-NEED TO FILL IN - this will show that traversal is closer to the 95\% mark for Dest Opts and 40\% for HbH opts. This is indeed similar for HbH (and much better for Dest Opts) compared to the traversal Jen and Fernando found in 2014 for the top 1M domains.
+
+\begin{table}[]
+\begin{tabular}{c|c|c|c}
+           & \% of dataset & Supports Dest Opts & Supports HbH Opts \\
+\hline
+Amazon & 52                      & Yes                & No                 \\
+\hline
+Cloudflare     & 23                     & Yes                 & No                 \\
+\hline
+Akamai    & 2.7                     & Yes                & No                 \\
+\hline
+Google      & 2.3                     & No                 & No                 \\
+\
+\end{tabular}
+\label{tbl:web_provider_support}
+\caption{End-server support for the Dest and HbH Opts for major webserver providers, n=99,987 paths, based on measurements from December 2022. Google does not support either option, and is not listed in the table as it only had 30 destinations in the dataset.
+}
+\end{table}
 
 
 \subsubsection{Option Type support}
 
-We repeated the experiment described above from one vantage point, varying the Option Type and Option Lnegth fields. 
+We repeated the DNS server experiment described above from one vantage point, varying the Option Type and Option Lnegth fields. 
 Table~\ref{tbl:option_type_support} shows the support for different Option Types within the authoritative NSes for the current Cisco Top 1 Million Domains. We test a well-known option, PadN~\cite{rfc2460}, against a recently-standardized one - Minimum Path MTU HbH Option~\cite{rfc9268}. We also test two experimental options, 30 and 254~\cite{RFC4727}. The latter was chosen to test the traversal behaviour where the Option Type has its two most significant bits set.
 We find that the Option Type does not affect traversal where the two most significant bits of the field are not set - with the same traversal percentage for PadN, PMTU Discovery and Experimental Option 30. Where the highest order bits are set, traversal is expected to be 0 - however, we still receive responses on 0.4\% of paths, indicating all devices on that path have ignored these bits.
 
@@ -599,15 +614,26 @@ Experimental Option (30)  & 69.4           & 15.1          \\
 Incorrect Option Length   & 0.5            & 0.05            
 \end{tabular}
 \label{tbl:option_type_support}
-\caption{End-to-end support for different Option Types in the authoritative NSes for the Cisco Top 1 Million Domains, n=19052 unique IPv6 targets. The transport used was UDP (Dataset P2).}
+\caption{End-to-end support for different Option Types in the authoritative NSes for the Cisco Top 1 Million Domains, n=19052 unique IPv6 targets. The transport used was UDP (dataset P2).}
 \end{table}
 
 \subsubsection{ICMP messages received at the source}
 
 Experimental Option 254 has its two most significant bits set. This means routers should discard packets with this option set and return an ICMP Type 4 Parameter Problem. To examine this, we extend PATHSpider to collect any ICMP messages received at the vantage point. 
 
-We find variable behaviours and configurations from the different locations we test. These are described in Table xxxx. Note: This table will show that many routers are correctly configured and do send the correct ICMP message, but that bugs still exist.
+We find variable behaviours and configurations from the different locations we test, which depend on the type of EH tested. These are described in Tables~\ref{tbl:icmp_support_dst} and~\ref{tbl:icmp_support_hbh} for Dest Opts and HBH Opts respectively.
 
+\begin{table}[]
+\begin{tabular}{llllll}
+                                                                                                                          & UK                    & Canada                & Australia             & Sgp             & Poland \\
+\multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}\% ICMP received\\ in vantage point AS\\ (correct behaviour)\end{tabular}} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} &        \\ \hline
+\multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}\% ICMP received\\ elsewhere on path\\ (incorrect behaviour)\end{tabular}} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} &        \\ \hline
+\multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}\% Reach Destination\\ (incorrect behaviour)\end{tabular}}                 & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} &        \\ \hline
+\multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}\%Filtered, no ICMP\\ (incorrect behaviour)\end{tabular}}                  & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} &       
+\end{tabular}
+\label{tbl:icmp_support_dst}
+\caption{End-to-end support for different Option Types in the authoritative NSes for the Cisco Top 1 Million Domains, n=19052 unique IPv6 targets. The transport used was UDP (dataset P2).}
+\end{table}
 
 \subsubsection{Longitudinal support}
 
@@ -624,10 +650,12 @@ HbH Opts  & 25.7\%   & 23.8\%   & 16.4\%    & 11.9\%   \\
 Unique IP addresses & 18296    & 19690    & 19553     & 20050   
 \end{tabular}
 \label{tbl:longitudinal_support}
-\caption{End-to-end support for an 8B Pad N option for both Dest and HbH EHs, from one vantage point to the authoritative NSes for the same set of 1M domains, between Jan 2020 and Dec 2022 (Dataset P1). The transport used was UDP.}
+\caption{End-to-end support for an 8B Pad N option for both Dest and HbH EHs, from one vantage point to the authoritative NSes for the same set of 1M domains, between Jan 2020 and Dec 2022 (dataset P1). The transport used was UDP.}
 \end{table}
 
 \subsection{AS analysis }
+
+Pevious figures show end-to-end server support. We note that end-to-end support is not the same metric as path traversal. The latter is concerned with whether packets reach the destination AS.
 
 Table~\ref{tbl:as_pathspider} presents ASes targeted by Pathspider (2868 in total) alongside evidence that they support either the Dest or HbH EH.
 If at least one reply is seen from that AS to one of our test packets from any of the locations tested, we consider that AS supports the traversal of packets using the tested EH type. Thus, at least 92.4\% of destination ASes allow traversal of packets carrying an 8B Dest Opts EH, and more than half, 53.8\%, allow an 8B HbH Options EH. The percentage drops when we consider multiple paths towards that AS, revealing that many packets carrying EHs are dropped in en-route in an AS different from the destination AS. For Dest Opts, 3.4\% fewer ASes support Dest Opts on more than half the paths, whereas for HbH Opts, the difference is 16.6\%.
@@ -645,14 +673,15 @@ AS supports HbH Opts on more than 1 path   & 1500 (53.8\%)                      
 AS supports HbH Opts on 50\% paths or more & 1037 (37.2\%)                                   & 580 (36.1\%)                                   
 \end{tabular}
 \label{tbl:as_pathspider}
-\caption{Number of ASes where DNS servers can be reached via packets carrying either Dest or HbH Opts. The first column considers all destination ASes in the dataset, while the second only looks at ASes that host 10 destinations or more. Based on measurements from December 2022 (Dataset P1).}
+\caption{Number of ASes where DNS servers can be reached via packets carrying either Dest or HbH Opts. The first column considers all destination ASes in the dataset, while the second only looks at ASes that host 10 destinations or more. Based on measurements from December 2022 (dataset P1).}
 \end{table}
 
 \section{Discussion} 
 \label{sec:discussion}
 
 Question 1: do extension header actually traverse common Internet paths? Is there a longitudinal trend making this more easy or harder?
-
+We find that packets with EHs traverse Internet paths in many cases, and that many ASes allow support.
+Packets with options are still dropped in transit networks, as validated on paths to server edge networks in Table~\ref{tbl:as_pathspider} and paths originating in access networks in Figure~\ref{fig:countrybox}. Misconfiguration or other network policies can result in pathologies within transit networks as shown in Subsection~\ref{subsec: pathologies}.
 
 Question 2: is there a limit to extension headers that prevents them from traversing certain Internet paths such as limiting length of the EH chain or a specific EH length? Would limits help in ensuring consistent deployment? Is it different between HBH and DO?
 
@@ -672,7 +701,8 @@ Question 6: what is the opportunity for destination options? Is it a good trade-
 
 ---
 
-We find that packets with EHs traverse Internet paths in many cases, and that many ASes allow support.
+
+
 Still, we find traversal is variable depending on EH, size, transport and type of network. We find these EHs can impact the function of load balancing routers and devices that modify the TCP MSS options and that deploying them in the Internet needs to take into account the type of network these will operate over.
 Packets with options are still dropped in transit networks, as validated on paths to server edge networks in Table~\ref{tbl:as_pathspider} and paths originating in access networks in Figure~\ref{fig:countrybox}. Misconfiguration or other network policies can result in pathologies within transit networks as shown in Subsection~\ref{subsec: pathologies}.
 
