@@ -538,7 +538,7 @@ Singapore             & \multicolumn{1}{c|}{x}      & 72.7    & \multicolumn{1}{
 Poland                & \multicolumn{1}{c|}{x}      & 76.8   & \multicolumn{1}{c|}{x}    & 24.7   
 \end{tabular}
 \label{tbl:e2e_traversal}
-\caption{End-to-end support for an 8B Pad N option for both Dest and HbH EHs, from vantage points in 5 countries to n=20082 unique authoritative NSes in the Cisco Umbrella Top 1M, in 2787 different known ASes. All measurements performed in February 2023, part of dataset P1. }
+\caption{End-to-end support for an 8B Pad N option for both Dest and HbH EHs, from vantage points in 5 countries to n=18002 unique authoritative NSes in the Cisco Umbrella Top 1M, in 2787 different known ASes. All measurements performed in February 2023, part of dataset P1. }
 \end{table}
 
 \begin{table}[]
@@ -563,7 +563,7 @@ Ionos      & 3                    & Yes                & No
 \subsection{End-to-end support}
 \label{subsec:e2esupport}
 
-Table~\ref{tbl:e2e_traversal} presents the end-to-end support for the authoritative NSes for the current Cisco Umbrella top 1M Domains list (Feb 2023.
+Table~\ref{tbl:e2e_traversal} presents the end-to-end support for the authoritative NSes for the current Cisco Umbrella top 1M Domains list (Feb 2023).
 % ANA TODO - double check results^
 
 As with the access network results previously presented, support varies between the Dest and HbH EHs: 69 to 80\% of the tested servers replied to packets using Dest Opts, and up to 24.2\% do so for HbH Opts. Traversal does not vary with transport in the same way seen for the access network results presented in the previous section. We attribute this to the lack of edge router devices normally present in access networks. Only one measurement, from the Singapore vantage point, sees a 5\% difference based on transport in favour of TCP for both EHs tested.
@@ -573,7 +573,7 @@ However, around one third of destinations in the DNS dataset featured in Table~\
 
 We tested end-to-end support for webservers in the Cisco Umbrella top 1M Domains list (232350 unique IP addresses, Feb 2023) from the same destinations. This list of webservers is much more dominated by a few major hosting companies: around 52\% of destinations are hosted by Amazon Inc (AS16509); 23\% are hosted by Cloudflare (AS13335), and around 2.5\% each are hosted by Akamai Technologies and Google. We break down supported EHs for each in Table~\ref{tbl:web_provider_support}. We find more than two-thrids of Amazon-hosted webservers respond to connections over packets with Dest Opts, in contrast to Amazon-hosted DNS servers, where none do. 
 
-Overall, we find end-to-end support for all tested webserver addresses to be between 57 and 68\% for Dest Opts packets and between 1 and 2\% for HbH Opts.
+Overall, we find end-to-end support for all tested webserver addresses to be between 72 and 78\% for Dest Opts packets and between 2-3\% for HbH Opts.
 
 
 \begin{table}[]
@@ -617,11 +617,18 @@ Incorrect Option Length   & 0.5            & 0.05
 \caption{End-to-end support for different Option Types in the authoritative NSes for the Cisco Top 1 Million Domains, n=19052 unique IPv6 targets. The transport used was UDP (dataset P2).}
 \end{table}
 
-\subsubsection{ICMP messages received at the source}
+\subsubsection{ICMP Unreachable Messages}
 
-Experimental Option 254 has its two most significant bits set. This means routers should discard packets with this option set and return an ICMP Type 4 Parameter Problem. To examine this, we extend PATHSpider to collect any ICMP messages received at the vantage point. 
+When a packet with a HbH Opt is sent but does not receive a reply (i.e. the packet is dropped on path),  ICMP unreachable messages are seen on 0.2\% of the tested NS paths. For Dest Opts packets, ICMP unreachable messages are seen on between 0.3 and 8.8\% of paths, depending on vantage point.
+This suggests that ICMP messages cannot be used to ascertain whether an packet carrying options was dropped in transit.
+Upon closer inspection, we also find that for all destinations, ICMP unreachable messages can be received even when the test succeeds on up to 2\% of paths. These are exclusively received from routers in destination ASes and indicate misconfiguration.
 
-We find variable behaviours and configurations from the different locations we test, which depend on the type of EH tested. These are described in Tables~\ref{tbl:icmp_support_dst} and~\ref{tbl:icmp_support_hbh} for Dest Opts and HBH Opts respectively.
+
+\subsubsection{ICMP Parameter Problem Messages}
+
+When a packet carries a Dest or Hbh Option which has its two MSBs set, routers that do not understand this option should discard packets with this option set and return an ICMP Type 4 Parameter Problem. To examine whether this is prevalent in the Internet, we send packets using experimental Option Type 254. This option has its two MSBs set and is unlikely to be understood by any routers, and therefore we expect any sent packets to be dropped within the vantage point from which they are sent.
+
+However,we find variable behaviours and configurations from the different locations we test, which depend on the type of EH tested. These are described in Tables~\ref{tbl:icmp_support_dst} and~\ref{tbl:icmp_support_hbh} for Dest Opts and HBH Opts respectively.
 
 \begin{table}[]
 \begin{tabular}{llllll}
@@ -679,52 +686,7 @@ AS supports HbH Opts on 50\% paths or more & 1037 (37.2\%)                      
 \section{Discussion} 
 \label{sec:discussion}
 
-Question 1: do extension header actually traverse common Internet paths? Is there a longitudinal trend making this more easy or harder?
-We find that packets with EHs traverse Internet paths in many cases, and that many ASes allow support.
-Packets with options are still dropped in transit networks, as validated on paths to server edge networks in Table~\ref{tbl:as_pathspider} and paths originating in access networks in Figure~\ref{fig:countrybox}. Misconfiguration or other network policies can result in pathologies within transit networks as shown in Subsection~\ref{subsec: pathologies}.
-
-Question 2: is there a limit to extension headers that prevents them from traversing certain Internet paths such as limiting length of the EH chain or a specific EH length? Would limits help in ensuring consistent deployment? Is it different between HBH and DO?
-
-
-Question 3: When options extension headers do traverse, do they traverse consistently for the same pair of endpoints? Is the flow label a help in ensuring a consistent set of network devices on a path?
-Is there a trend to set meaningful entropy in the flow label against the original place where many endpoints sent a zero value flow label?
-Here we should not forget the proposals to add flow metadata as a hop by hop extension to let network devices know helpful information to consider how to fold the packets in a flow.
-
-
-Question 4: is there a possibility to deploy a different new option...is this sensitive to the format of the option or the presence of a new defined option? This is a part whether a specific option causes the traverse ability to change, or whether an illegal format option changes the traversability of the packet.
-
-
-Question 5: If we find HBH options don’t work everywhere then ….What is the opportunity for using a hop by hop extension header on some of the packets belonging to a flow? does this result in new forwarding pathologies? That is where the packets with extension headers take a different set of devices to the packets without extension headers, and if so do they take a different network or do they simply follow a different path through the same operator network? Does this result in inconsistent loss? Is the option useful ?
-
-
-Question 6: what is the opportunity for destination options? Is it a good trade-off to have a network layer? That is consistent transport header or is it wiser to put the transport header information within the transport and therefore allow it to be encrypted such as quic transport parameter - so what is the real advantage of destination options?
-
----
-
-
-
-Still, we find traversal is variable depending on EH, size, transport and type of network. We find these EHs can impact the function of load balancing routers and devices that modify the TCP MSS options and that deploying them in the Internet needs to take into account the type of network these will operate over.
-Packets with options are still dropped in transit networks, as validated on paths to server edge networks in Table~\ref{tbl:as_pathspider} and paths originating in access networks in Figure~\ref{fig:countrybox}. Misconfiguration or other network policies can result in pathologies within transit networks as shown in Subsection~\ref{subsec: pathologies}.
-
-EHs up to 40B in size sent over UDP have the highest chance of traversing access network paths, as shown in Figure~\ref{fig:sizes}.
-Our results also show that most routers are configured to discard packets and send ICMP messages as specified by~\cite{RFC4443} when encountering an option that cannot be processed.However, we still find instances where a router sends this message in response to a Dest Opts EH that has both most significant bits set, but packets are forwarded nevertheless; a more common pathology is forwarding HbH Opts EH packets with both most significant bits set without sending an ICMP message.
- 
-RFC 7872~\cite{RFC7872} describes the traversal to the authoritative NSes for the Alexa Top 1M domains in 2014. They find 21.33\% of NSes drop packets carrying an 8B PadN Dest Opt and 54.12\% drop packets carrying an 8B PadN HbH Opt.
-Their results are not grouped per AS, and so our results confirm an (in)crease in support for both types of options from aa and bb to xx and yy respectively.
-%although this may reflect changes within the the top 1M domain list itself (Table~\ref{tbl:as_pathspider}) between 2014 and 2023.
-
-Testing the same set of 1M domains between 2019 and 2022 reveals the support for 8B PadN HbH Opts decreases over time when considering individual destinations (Table~\ref{tbl:longitudinal_support}) as more NS servers become centralised under only a few ASes that do not support HbH Opts. However, an AS analysis reveals more than half of the tested ASes support HBH and more than 90\% support Dest Opts, and that transit networks can represent a barrier to deployment for HbH Opt packets.
-
-We also find that traversal does not depend on the type of option sent (see Table~\ref{tbl:option_type_support}) and so any new specified Dest or HbH Opts (such as the Min. PMTU Discovery Option~\cite{rfc9268}) will not be automatically dropped and their traversal will not depend on changes to deployed infrastructure.
-
-Traffic flows that mix packets with options and packets without options must take care as they may not travel on the same Internet path.
-
-
-\section{Conclusion}
-\label{sec:conclusion}
-
-
-However, since its standardisation in the late nineties, the IPv6 protocol has
+Since its standardisation, the IPv6 protocol has
 seen widespread adoption~\cite{v6adoption_ton} and the hardware and software to
 support it have matured: packet lookup capacity in routers is increasing and
 router architectures have evolved, with solutions based on re-configurable
@@ -733,6 +695,49 @@ emerging~\cite{cisco-silicon-one}.
 
 Updates have also been made to the IPv6 standard itself based on this
 operational experience~\cite{RFC5722}~\cite{RFC6734}~\cite{RFC6564}~\cite{RFC8200}. These improvements continue as EH processing has become a recent focus in the standards community, aiming to motivate a change in both network operator policies and the implementation of more resilient router architectures that facilitate EH processing~\cite{ietf-6man-hbh-processing-06, ietf-v6ops-hbh-03, ietf-6man-eh-limits-02}. 
+
+
+%Question 1: do extension header actually traverse common Internet paths? Is there a longitudinal trend making this more easy or harder?
+We find that packets with EHs traverse Internet paths in many cases, and that many ASes allow support.
+Packets with HbH Opts are still dropped in many transit networks (as validated on paths to server edge networks in Table~\ref{tbl:as_pathspider}) and in access networks in Figure~\ref{fig:countrybox}. Misconfiguration or other network policies can result in pathologies within transit networks as shown in Subsection~\ref{subsec: pathologies}. We also find that traversal drops significantly on paths containing edge-network devices which insert a TCP transport option.
+
+Server-side, testing the same set NSes between 2019 and 2022 reveals the support for 8B PadN HbH Opts decreases over time when considering individual destinations (Table~\ref{tbl:longitudinal_support}) as more NS servers become centralised under only a few ASes that do not support HbH Opts.  However, an AS analysis reveals more than half of the tested ASes allow packets carrying a HbH Opts EH and more than 90\% allow packets carrying a Dest Opts EH. The AS analysis confirms that transit networks can represent a barrier to deployment for the HbH Opts EH.
+ 
+RFC 7872~\cite{RFC7872} describes the traversal to the authoritative NSes for the Alexa Top 1M domains in 2014. They find packets carrying an 8B PadN Dest Opt traverse to 78.6\% of destinations and packets carrying an 8B PadN HbH Opts traverse to 45.9\% of destinations. Their results are obtained from a single vantage point and are not grouped per AS and so can be compared with results in Table~\ref{tbl:longitudinal_support}.
+This indicates an a small decrease in support for Dest Opts and a larger decrease in support for HBH Opts on paths to NS servers, although this may reflect changes within the top 1M domain list itself between 2014 and 2023.
+Also, our AS analysis reveals that packets with Options traverse to up to 90\% and over 50\% of ASes respectively, and so we can infer the decrease is due to drops within the destination AS.
+
+%Question 2: is there a limit to extension headers that prevents them from traversing certain Internet paths such as limiting length of the EH chain or a specific EH length? Would ? Is it different between HBH and DO?
+
+EHs up to 40B in size sent over UDP have the highest chance of traversing access network paths, as shown in Figure~\ref{fig:sizes}, for a total IPv6 header and transport chain of under 104B. This suggests that when using EHs, keeping packet sizes under this limit may help in ensuring consistent deployment.
+
+%Question 4: is there a possibility to deploy a different new option...is this sensitive to the format of the option or the presence of a new defined option? This is a part whether a specific option causes the traverse ability to change, or whether an illegal format option changes the traversability of the packet.
+
+We also find that traversal does not depend on the type of option sent (see Table~\ref{tbl:option_type_support}) and so any new specified Dest or HbH Opts (such as the Min. PMTU Discovery Option~\cite{rfc9268}) will not be automatically dropped and their traversal will not depend on changes to deployed infrastructure.
+
+%Question 3: When options extension headers do traverse, do they traverse consistently for the same pair of endpoints? Is %the flow label a help in ensuring a consistent set of network devices on a path?
+%Is there a trend to set meaningful entropy in the flow label against the original place where many endpoints sent a zero value flow label?
+%Here we should not forget the proposals to add flow metadata as a hop by hop extension to let network devices know helpful information to consider how to fold the packets in a flow.
+
+%Question 5: If we find HBH options don’t work everywhere then ….What is the opportunity for using a hop by hop extension header on some of the packets belonging to a flow? does this result in new forwarding pathologies? That is where the packets with extension headers take a different set of devices to the packets without extension headers, and if so do they take a different network or do they simply follow a different path through the same operator network? Does this result in inconsistent loss? Is the option useful ?
+
+Results presented in Figure~\ref{fig:paths-detected} show that adding an option to a packet may change its forwading path. We note that both the Flow Label and the source port of packets were varied to detect paths between the same pair of endpoints. EHs sit between the IPv6 header (which contains the flow label) and the transport header (which contains the source port), suggesting some load-balancing networking equipment use a byte offset which is expected to contain the source port, and that the flow label is not used in all cases. Overall, this means traffic flows that mix packets with these EHs and packets without must take care as these may not travel on the same Internet path.
+
+
+%Question 6: what is the opportunity for destination options? Is it a good trade-off to have a network layer? That is consistent transport header or is it wiser to put the transport header information within the transport and therefore allow it to be encrypted such as quic transport parameter - so what is the real advantage of destination options?
+
+---
+
+
+
+
+%Our results also show that most routers are configured to discard packets and send ICMP messages as specified by~\cite{RFC4443} when encountering an option that cannot be processed.However, we still find instances where a router sends this message in response to a Dest Opts EH that has both most significant bits set, but packets are forwarded nevertheless; a more common pathology is forwarding HbH Opts EH packets with both most significant bits set without sending an ICMP message.
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+We  find traversal of HbH and Dest Opts is variable depending on EH, size, transport and type of network. We find these EHs can impact the function of load balancing routers and devices that modify the TCP MSS options and that deploying them in the Internet needs to take into account the type of network these will operate over.
 
 
 \bibliographystyle{abbrv}
