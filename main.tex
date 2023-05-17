@@ -349,7 +349,7 @@ RFC 9288~\cite{rfc9288} produced a set of recommendations for transit routers. W
 
 This paper employs a combination of tools and experiments to delve into various aspects of HbH and Dest Opts traversal. Table~\ref{tbl:datasets} presents the purpose and name of each resulting dataset, alongside the time periods each measurement was ran and the transport protocols that it used.
 
-\begin{table}[h]
+\begin{table}
 \begin{tabular}{p{0.17\textwidth}|p{0.075\textwidth}|p{0.03\textwidth}|p{0.065\textwidth}|p{0.03\textwidth}}
 Purpose                                                                          & Tool Used        & Name & Date               & Trans. \\
 \hline
@@ -473,7 +473,7 @@ We find a traversal of only 2.6\% for HbH and 48.1\% for Dest Opts for this subs
 \end{figure}
 
 
-\begin{table}[]
+\begin{table}
 \centering
 \caption{Per-AS drop attribution for 8B Dest Opts packets sent from n=4970 RIPE Atlas vantage points to a target destination in AS786. The local AS is responsible for the majority (5\% for UDP and 25\% for TCP) of the drops.}
  \label{tbl:uk_as1}
@@ -527,21 +527,21 @@ This set of measurements indicates that not all load balancer implementations ar
 This section presents results obtained with PATHspider. In contrast to the RIPE Atlas tests, these experiments use a limited number of vantage points and target a large number of destinations. Where the destination is an authoritative NS, PATHSpider first performs a control measurement by sending a DNS query to the server using vanilla IPv6 packets. The same measurement is then repeated using an 8 Byte PadN Dest or HbH Opts, and in each case the test is considered successful if the server replies to the DNS query. Where the destination is a web server, the test can only be done over TCP by sending a TCP SYN, and is considered successful if the server replies with a TCP SYN-ACK.
 This section reports on the end-to-end support, or the percentage of paths where test packets were observed to receive a response from the destination server.
 
-\begin{table}[]
+\begin{table} 
 \begin{tabular}{c|cc|cc}
 \multicolumn{1}{l|}{} & \multicolumn{2}{c|}{Dest Opts Support} & \multicolumn{2}{c}{HbH Opts Support} \\ \cline{2-5} 
 \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{TCP}       & UDP      & \multicolumn{1}{c|}{TCP}     & UDP     \\ \hline
 UK                    & \multicolumn{1}{c|}{69.1}      & 69.3    & \multicolumn{1}{c|}{12.5}    & 15.8  \\ \hline
-Canada                & \multicolumn{1}{c|}{x}      & 76     & \multicolumn{1}{c|}{x}    & 24.2  \\ \hline
-Australia             & \multicolumn{1}{c|}{x}        & 72.2      & \multicolumn{1}{c|}{x}    & 17.5  \\ \hline
-Singapore             & \multicolumn{1}{c|}{x}      & 72.7    & \multicolumn{1}{c|}{x}    & 17.4   \\ \hline
-Poland                & \multicolumn{1}{c|}{x}      & 76.8   & \multicolumn{1}{c|}{x}    & 24.7   
+Canada                & \multicolumn{1}{c|}{76.3}      & 76     & \multicolumn{1}{c|}{23.3}    & 24.2  \\ \hline
+Australia             & \multicolumn{1}{c|}{72.5}        & 72.2      & \multicolumn{1}{c|}{17.7}    & 17.5  \\ \hline
+Singapore             & \multicolumn{1}{c|}{72.8}      & 72.7    & \multicolumn{1}{c|}{17.4}    & 17.4   \\ \hline
+Poland                & \multicolumn{1}{c|}{76.5}      & 76.8   & \multicolumn{1}{c|}{24.4}    & 24.7   
 \end{tabular}
 \label{tbl:e2e_traversal}
 \caption{End-to-end support for an 8B Pad N option for both Dest and HbH EHs, from vantage points in 5 countries to n=18002 unique authoritative NSes in the Cisco Umbrella Top 1M, in 2787 different known ASes. All measurements performed in February 2023, part of dataset P1. }
 \end{table}
 
-\begin{table}[]
+\begin{table} 
 \begin{tabular}{c|c|c|c}
            & \% of dataset & Supports Dest Opts & Supports HbH Opts \\
 \hline
@@ -576,7 +576,7 @@ We tested end-to-end support for webservers in the Cisco Umbrella top 1M Domains
 Overall, we find end-to-end support for all tested webserver addresses to be between 72 and 78\% for Dest Opts packets and between 2-3\% for HbH Opts.
 
 
-\begin{table}[]
+\begin{table} 
 \begin{tabular}{c|c|c|c}
            & \% of dataset & Supports Dest Opts & Supports HbH Opts \\
 \hline
@@ -603,7 +603,7 @@ We find that the Option Type does not affect traversal where the two most signif
 
 The same applies for an incorrectly set Option Length field. As any device parsing the EH field should validate the Option Length set for each option, traversal is expected to be 0; however we still find a small number of paths (0.5\%, or around 80 paths) where all devices on the path ignore this field.
 
-\begin{table}[]
+\begin{table}
 \begin{tabular}{l|l|l}
 Test                      & Dest Options EH & HbH Options EH \\
 \hline
@@ -620,26 +620,44 @@ Incorrect Option Length   & 0.5            & 0.05
 \subsubsection{ICMP Unreachable Messages}
 
 When a packet with a HbH Opt is sent but does not receive a reply (i.e. the packet is dropped on path),  ICMP unreachable messages are seen on 0.2\% of the tested NS paths. For Dest Opts packets, ICMP unreachable messages are seen on between 0.3 and 8.8\% of paths, depending on vantage point.
-This suggests that ICMP messages cannot be used to ascertain whether an packet carrying options was dropped in transit.
+This suggests that ICMP messages cannot be used to ascertain whether a packet carrying options was dropped in transit.
 Upon closer inspection, we also find that for all destinations, ICMP unreachable messages can be received even when the test succeeds on up to 2\% of paths. These are exclusively received from routers in destination ASes and indicate misconfiguration.
 
 
 \subsubsection{ICMP Parameter Problem Messages}
 
-When a packet carries a Dest or Hbh Option which has its two MSBs set, routers that do not understand this option should discard packets with this option set and return an ICMP Type 4 Parameter Problem. To examine whether this is prevalent in the Internet, we send packets using experimental Option Type 254. This option has its two MSBs set and is unlikely to be understood by any routers, and therefore we expect any sent packets to be dropped within the vantage point from which they are sent.
+When a packet carries a Dest or Hbh Option which has its two MSBs set, routers that do not understand this option should discard packets with this option and return an ICMP Type 4 Parameter Problem message back to the sender. To examine whether this is prevalent in the Internet, we repeat the DNS server experiments using packets using experimental Option Type 254. This option has its two MSBs set and is unlikely to be understood by any routers, and therefore we expect any sent packets to be dropped.
 
-However,we find variable behaviours and configurations from the different locations we test, which depend on the type of EH tested. These are described in Tables~\ref{tbl:icmp_support_dst} and~\ref{tbl:icmp_support_hbh} for Dest Opts and HBH Opts respectively.
+Behaviours for Dest Opts and HBH Opts respectively are described in Table~\ref{tbl:icmp_support_dst}.
 
-\begin{table}[]
-\begin{tabular}{llllll}
-                                                                                                                          & UK                    & Canada                & Australia             & Sgp             & Poland \\
-\multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}\% ICMP received\\ in vantage point AS\\ (correct behaviour)\end{tabular}} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} &        \\ \hline
-\multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}\% ICMP received\\ elsewhere on path\\ (incorrect behaviour)\end{tabular}} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} &        \\ \hline
-\multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}\% Reach Destination\\ (incorrect behaviour)\end{tabular}}                 & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} &        \\ \hline
-\multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}\%Filtered, no ICMP\\ (incorrect behaviour)\end{tabular}}                  & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} &       
+In the case of Dest Options, for all vantage points tested, only the gateway router local to the vantage point returns ICMP Type 4 Parameter Problem messages for the packets sent, as expected; the percentage of destinations for which the ICMP messages are received varies between 50-100\%. As the local router always generates these messages, we attribute this variation to ICMP rate limiting. 
+
+In the case of Hop-by-hop options, we find that while the local gateways in all vantage points forward the packets,  ICMP Type 4 Parameter Problem messages are received from intermediary routers on the path or in the destination AS. The response rate varies between 52 and 73\%. 
+
+For both EHs tested, due to ICMP rate-limiting and filtering, this mechanism is not found to be a reliable indicator on whether or not a packet with an unknown option with its two MSBs set is dropped. We also find that on many paths, packets with Hop-by-Hop Options are forwarded nevertheless.
+
+In addition, for Dest Opts packets, on between 0.2 and 0.5\% of paths, we also find that despite sending this message, the local router also forwards the packets to the destination and a response is still obtained by the server (the end-to-end test succeeds), which could indicate a router implementation issue.
+
+\begin{table}
+\begin{tabular}{p{0.12\textwidth}|p{0.04\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.025\textwidth}}
+
+\centering
+
+                                           &             & UK        & Can       & Aus    & Sgp          & Pol     \\
+                                           \hline
+
+{\% ICMP received in vantage AS}        & {HBH DEST} & {0 100}  & {0 51.6}    & {0 51.9}    & {0 51.9}    & {0 51.5}  \\
+\hline
+{\% ICMP received elsewhere on path}          & {HBH DEST} & {72.8 0} & {52.5 0}    & {68.2 0}    & {69.2 0}    & {73  0}    \\
+\hline
+
+{\% ICMP received, packet forwarded}          & {HBH DEST} & {0 0.52} & {0 0.48}    & {0 0.46}    & {0 0.24}    & {0 0.46}  \\
+\hline
+
+{\% ICMP message not received} & {HBH DEST} & {27.2 0} & {47.5 48.4} & {31.8 48.1} & {30.8 48.1} & {27 48.5} 
 \end{tabular}
+\caption{Different behaviours for ICMP rate-limiting.}
 \label{tbl:icmp_support_dst}
-\caption{End-to-end support for different Option Types in the authoritative NSes for the Cisco Top 1 Million Domains, n=19052 unique IPv6 targets. The transport used was UDP (dataset P2).}
 \end{table}
 
 \subsubsection{Longitudinal support}
@@ -647,7 +665,7 @@ However,we find variable behaviours and configurations from the different locati
 Table~\ref{tbl:longitudinal_support} presents measurements over the same set of domains over the course of 3 years. The domains were resolved prior to each measurement, resulting in a variation of the total unique IP addresses tested, presented in the last table row. The results show a trend towards lower support for HbH Opts, with Dest Opts support remaining constant over time, until December 2022 when Cloudflare enables support as described in Subsection~\ref{subsec:e2esupport}.
 
 % Ana: verify total number of paths.
-\begin{table}[]
+\begin{table}
 \begin{tabular}{l|l|l|l|l}
                     & Jan 2020 & Jul 2020 & July 2022 & Dec 2022 \\
 \hline
@@ -668,7 +686,7 @@ Table~\ref{tbl:as_pathspider} presents ASes targeted by Pathspider (2868 in tota
 If at least one reply is seen from that AS to one of our test packets from any of the locations tested, we consider that AS supports the traversal of packets using the tested EH type. Thus, at least 92.4\% of destination ASes allow traversal of packets carrying an 8B Dest Opts EH, and more than half, 53.8\%, allow an 8B HbH Options EH. The percentage drops when we consider multiple paths towards that AS, revealing that many packets carrying EHs are dropped in en-route in an AS different from the destination AS. For Dest Opts, 3.4\% fewer ASes support Dest Opts on more than half the paths, whereas for HbH Opts, the difference is 16.6\%.
 When only considering the subset of ASes (1606) tested over 10 or more paths, the results vary little: at least 93.2\% of destination ASes allow traversal of packets carrying an 8B Dest Opts EH, and more than half, 55.9\%, allow an 8B HbH Opts EH.
 
-    \begin{table}[]
+    \begin{table}
 \begin{tabular}{p{0.195\textwidth}|p{0.11\textwidth}p{0.118\textwidth}}
                                           & Paths per AS$>$=1 & Paths per AS$>$=10 \\ \cline{1-3} 
 Total number of ASes                      & 2787                                            & 1606                                            \\ \hline
