@@ -277,7 +277,7 @@ In addition, certain network devices need to inspect the transport protocol info
 This requires parsing the entire IPv6 header chain, from the base header to the last EH. 
 Such devices are common at a network domain edge, including the edge of enterprise and home networks.
 
-Other examples utilising upper layer protocol headers include: Routers performing Equal Cost Multipath Routing (ECMP), application-layer load balancing, Multi-field classifiers for QoS; deep packet inspection (DPI) and Denial of Service (DoS) attack mitigation. 
+Other examples of utilising upper layer protocol headers include: Routers performing Equal Cost Multipath Routing (ECMP), application-layer load balancing, Multi-field classifiers for QoS, deep packet inspection (DPI) and Denial of Service (DoS) attack mitigation. 
 XXX
 Refer a little to:
 Classification of Load Balancing in the Internet - both v4 and v6, interesting note on diamond depth - which might start to answer one of our questions
@@ -377,7 +377,7 @@ Atlas allows the size to be set for both types of EHs when performing measuremen
 We collected traceroute data from all vantage points available on the platform, using both DST and HBH EHs of 8B, and in each case using UDP and TCP as the underlying transport, to seven different globally distributed target servers (dataset R1), without varying the source port and IPV6 Flow Label. Baseline UDP and TCP measurements using packets (without any EH) were also collected for each target.
 A separate experiment keeps the destination country fixed, but varies the transport and size of EH between 8 and 64B (dataset R2).
 
-Finally, we use the Atlas platfrom to perform Paris Traceroute~\cite{augustin2006avoiding} measurements, aiming to detect whether using an EH impacts the path taken between a vantage point and destination. We only select vantage points where traversal is successful over UDP for both types of tested EH to a specific target, ensuring a total of 866 complete paths are measured.
+Finally, we use the RIPE Atlas platfrom to perform Paris Traceroute~\cite{augustin2006avoiding} measurements, aiming to detect whether using an EH impacts the path taken between a vantage point and destination. We only select vantage points where traversal is successful over UDP for both types of tested EH to a specific target, ensuring a total of 866 complete paths are measured.
 We measure these paths using vanilla IPv6 packets, and packets carrying 8 Bytes Dest and HBH EHs. Each measurement was repeated 16 times, with each repetition varying the source port and flow label of the traceroute packets. Each repetition is assigned a Paris ID to identify it. Finally, we repeat each set of 16 Paris measurements 5 times (dataset R3).
 
 
@@ -394,12 +394,12 @@ for a source-destination pair, toof understand how often ICMP Type 3 (Destinatio
 
 For the server-side measurements, the selected targets  are DNS servers, because these can be surveyed using both UDP and TCP, although we also present traversal results for the webservers underpinning the Cisco Umbrella top 1M domains.
 
-The next two sections present the Atlas (access network) and PATHSpider (server edge) results.
+The next two sections present the RIPE Atlas (access network) and PATHSpider (server edge) results.
 
 \section{Results for Access Networks measured using RIPE Atlas} 
 \label{sec:ripe-results}
 
-This section presents results obtained using the Atlas platform, using up to 5000 vantage points towards 8 destinations, of which half are under the control of the researcher. The section reports the percentage of paths where test packets were observed to reach the destination AS (the traversal rate). Packets not reaching the destination AS are considered dropped. 
+This section presents results obtained using the RIPE Atlas platform, using up to 5000 vantage points towards 8 destinations, of which half are under the control of the researcher. The section reports the percentage of paths where test packets were observed to reach the destination AS (the traversal rate). Packets not reaching the destination AS are considered dropped. 
 
 \subsection{Traversal to destination AS}
 
@@ -426,7 +426,7 @@ We attribute this reduction in the traversal as being dependent of the size of t
 \begin{figure}
 \centering
   \includegraphics[width=0.45\textwidth]{sizes.png}
-  \caption{Traversal percentage forfor packet including HBH and DST EHs from Atlas vantage points to a target server within the JANET network (AS876), per size of EH and split by transport.  Total n=129,585 measurements, with a mean of 4628 measurements ($\sigma$=351) for each combination of transport, size and EH  (dataset R2). This variation in the number of measurements results from availability and connectivity of  probes  with time.}
+  \caption{Traversal percentage for packet including HBH and DST EHs from Atlas vantage points to a target server within the JANET network (AS876), per size of EH and split by transport.  Total n=129,585 measurements, with a mean of 4628 measurements ($\sigma$=351) for each combination of transport, size and EH  (dataset R2). This variation in the number of measurements results from availability and connectivity of  probes  with time.}
   \label{fig:sizes}
 \end{figure}
 
@@ -442,12 +442,11 @@ The results show a very low EH traversal when using TCP towards the Kazakhstan a
   \label{fig:traversal_pathologies}
 \end{figure}
 
-Operator mis-configuration can influence traversal: The only BGP peer for the Kazakhstan network is Hurricane Electric (AS6939) and use a  brokering service where the IPv6 peering is tunneled over an existing IPv4 connection to an endpoint located in Dusseldorf. Upon closer inspection, we find that the 7\% of paths where packets traverse to the destination network originate (with 3 exceptions) in ASes located Australia/New Zealand. The 50\% dropped packets that originate in other geographical areas are filtered at the tunnel endpoint. We therefore assume misconfiguration or a policy within the HE transit network routers results in this pathology. 
+Operator mis-configuration can influence traversal: The only BGP peer for the Kazakhstan network is Hurricane Electric (AS6939) and uses a  brokering service where the IPv6 peering is tunneled over an existing IPv4 connection to an endpoint located in Dusseldorf. Upon closer inspection, we find that the 7\% of paths where packets including DST traverse to the destination network originate (with 3 exceptions) in ASes located Australia/New Zealand. The 50\% dropped packets that originate in other geographical areas are filtered at the tunnel endpoint. We therefore assume misconfiguration or a policy within the HE transit network routers results in this pathology. 
 %They can also come from comcast but somehow they bypass HE?!?!?!?!
 
 
-The only BGP peer of the target network in Zambia is Ubuntunet Alliance For Research and Education Networking (AS36944). Over 50\% of packets are dropped at the last hop seen in this AS. There is no common origin for the results wherepackets do
-traverse, therefore we attribute drops are a result of policy. 
+The only BGP peer of the target network in Zambia is Ubuntunet Alliance For Research and Education Networking (AS36944). Over 50\% of TCP packets including DST are dropped at the last hop seen in this AS. There is no common origin for the results where packets do traverse, suggesting the DST drops are a result of an operator policy. 
 
 \subsection{Path traversal analysis}
 
@@ -510,9 +509,9 @@ HBH TCP 8B & 26.9\% & 16.3\%               & 13.9\% & 9.7\%                & 8.6
 
 \subsection{Internet path analysis}
 
-Load balancing routers are another type of on-path device that can be configured to read  the upper layer headers of a packet. We perform Paris Traceroute measurements todetermine whether this function is impacted by a packet that includes an EH. This tool aims to detect the presence of load balancing on a given path~\cite{augustin2006avoiding}, by performing multiple traceroute measurements varying several header fields (a `Paris variation'); on-path devices may use several fields for load-balancing. To identify the packets sent for a specific measurement, Paris Traceroute idebntifies each variation basedon either the TCPsequence number field or the UDP checksum field
+Load balancing routers are another type of on-path device that can be configured to read  the upper layer headers of a packet. We perform Paris Traceroute measurements to determine whether this function is impacted by a packet that includes an EH. This tool aims to detect the presence of load balancing on a given path~\cite{augustin2006avoiding}, by performing multiple traceroute measurements varying several header fields (a `Paris variation'); on-path devices may use several fields for load-balancing. To identify the packets sent for a specific measurement, Paris Traceroute identifies each variation based on either the TCP sequence number field or the UDP checksum field.
 
-Six sets of measurements were run from  vantage points to the Zambian destination, with each measurement set using 16 Paris variations. We select the vantage points and destination based on previous measurements so as to only measure complete paths, where traversal always succeeds, 766 paths in total. The Paris Traceroute version used by Atlas varies the IPv6 Flow Label and transport port number deterministically between individual Paris measurements. Each group of 16 Paris measurements forms a measurement set. The same 16 combinations of IPv6 Flow Label and port number are used for subsequent measurement sets.
+Six sets of measurements were run from all vantage points to the Zambian destination, with each measurement set using 16 Paris variations. We select the vantage points and destination based on previous measurements so as to only measure complete paths, where traversal always succeeds, 766 paths in total. The Paris Traceroute version used by Atlas varies the IPv6 Flow Label and transport port number deterministically between individual Paris measurements. Each group of 16 Paris measurements forms a measurement set. The same 16 combinations of IPv6 Flow Label and port number are used for subsequent measurement sets.
 
 \begin{figure}
 \centering
