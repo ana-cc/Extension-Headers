@@ -1,55 +1,94 @@
-@article{10.1145/2534169.2486011,
-author = {Bosshart, Pat and Gibb, Glen and Kim, Hun-Seok and Varghese, George and McKeown, Nick and Izzard, Martin and Mujica, Fernando and Horowitz, Mark},
-title = {Forwarding Metamorphosis: Fast Programmable Match-Action Processing in Hardware for SDN},
+@article{metamorphosis,
+author = {Bosshart, Pat and others},
+title = {{Forwarding Metamorphosis: Fast Programmable Match-Action Processing in Hardware for SDN}},
 year = {2013},
 issue_date = {October 2013},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
+publisher = {ACM},
+address = {NY, USA},
 volume = {43},
 number = {4},
 issn = {0146-4833},
-url = {https://doi.org/10.1145/2534169.2486011},
 doi = {10.1145/2534169.2486011},
-abstract = {In Software Defined Networking (SDN) the control plane is physically separate from the forwarding plane. Control software programs the forwarding plane (e.g., switches and routers) using an open interface, such as OpenFlow. This paper aims to overcomes two limitations in current switching chips and the OpenFlow protocol: i) current hardware switches are quite rigid, allowing ``Match-Action'' processing on only a fixed set of fields, and ii) the OpenFlow specification only defines a limited repertoire of packet processing actions. We propose the RMT (reconfigurable match tables) model, a new RISC-inspired pipelined architecture for switching chips, and we identify the essential minimal set of action primitives to specify how headers are processed in hardware. RMT allows the forwarding plane to be changed in the field without modifying hardware. As in OpenFlow, the programmer can specify multiple match tables of arbitrary width and depth, subject only to an overall resource limit, with each table configurable for matching on arbitrary fields. However, RMT allows the programmer to modify all header fields much more comprehensively than in OpenFlow. Our paper describes the design of a 64 port by 10 Gb/s switch chip implementing the RMT model. Our concrete design demonstrates, contrary to concerns within the community, that flexible OpenFlow hardware switch implementations are feasible at almost no additional cost or power.},
 journal = {SIGCOMM Comput. Commun. Rev.},
-month = {aug},
 pages = {99–110},
 numpages = {12},
 keywords = {reconfigurable match tables, rmt model, sdn}
 }
 
-  
 
-@inproceedings{metamorphosis,
-author = {Bosshart, Pat and Gibb, Glen and Kim, Hun-Seok and Varghese, George and McKeown, Nick and Izzard, Martin and Mujica, Fernando and Horowitz, Mark},
-title = {Forwarding Metamorphosis: Fast Programmable Match-Action Processing in Hardware for SDN},
-year = {2013},
-isbn = {9781450320566},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-url = {https://doi.org/10.1145/2486001.2486011},
-doi = {10.1145/2486001.2486011},
-booktitle = {Proceedings of the ACM SIGCOMM 2013 Conference on SIGCOMM},
-pages = {99–110},
-numpages = {12},
-keywords = {sdn, rmt model, reconfigurable match tables},
-location = {Hong Kong, China},
-series = {SIGCOMM '13}
+@article{transactions-fpga,
+author = {C. Sankaran, Ganesh and Sivalingam, Krishna M.},
+title = {{A minimal resource high-speed routing lookup mechanism for servers with NetFPGAs}},
+journal = {Transactions on Emerging Telecommunications Technologies},
+volume = {33},
+number = {4},
+doi = {https://doi.org/10.1002/ett.4429},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/ett.4429},
+year = {2022}
 }
 
-@INPROCEEDINGS{lb-classification,
-  author={Almeida, Rafael and Cunha, ítalo and Teixeira, Renata and Veitch, Darryl and Diot, Christophe},
-  booktitle={IEEE INFOCOM 2020 - IEEE Conference on Computer Communications}, 
-  title={Classification of Load Balancing in the Internet}, 
-  year={2020},
-  pages={1987-1996},
-  doi={10.1109/INFOCOM41043.2020.9155387}}
 
+
+@INPROCEEDINGS{programmable-data-plane,
+  author={Bifulco, Roberto and Rétvári, Gábor},
+  booktitle={IEEE HPSR'19}, 
+  title={A Survey on the Programmable Data Plane: Abstractions, Architectures, and Open Problems}, 
+  year={2018},
+  volume={},
+  number={},
+  pages={1-7},
+  doi={10.1109/HPSR.2018.8850761}}
+
+@ARTICLE{srperf,
+  author={Abdelsalam, Ahmed andothers},
+  journal={IEEE Transactions on Network and Service Management}, 
+  title={SRPerf: A Performance Evaluation Framework for IPv6 Segment Routing}, 
+  year={2021},
+  volume={18},
+  number={2},
+  pages={2320-2333},
+  doi={10.1109/TNSM.2020.3048328}}
+
+
+
+@techreport{ietf-taps-arch-18,
+    number =    {draft-ietf-taps-arch-18},
+    type =      {Internet-Draft},
+    institution =   {IETF},
+    publisher = {IETF},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-ietf-taps-arch/18/},
+        author =    {Tommy Pauly and others},
+    title =     {{An Architecture for Transport Services}},
+    pagetotal = 33,
+    year =      2023,
+
+}
+
+@inproceedings{custura-mtu,
+author = {Custura, Ana and others},
+year = {2018},
+pages = {1-8},
+title = {{Exploring Usable Path MTU in the Internet}},
+booktitle = {Traffic Measurement Analysis Conference},
+doi = {10.23919/TMA.2018.8506538}
+}
+
+@InProceedings{lb-classification,
+author="Almeida, R.
+and others",
+title={{A Characterization of Load Balancing on the IPv6 Internet}},
+booktitle="PAM'17",
+year="2017",
+publisher="Springer Int. Publishing",
+pages="242--254",
+isbn="978-3-319-54328-4"
+}
 
 @ARTICLE{flow-label-approaches,
   author={Becerra Sanchez, Line Yasmin and Padilla Aguilar, Jhon Jairo},
   journal={IEEE Latin America Transactions}, 
-  title={Review of Approaches for the use of the Label Flow of IPv6 Header}, 
+  title={{Review of Approaches for the use of the Label Flow of IPv6 Header}}, 
   year={2014},
   volume={12},
   number={8},
@@ -57,7 +96,7 @@ series = {SIGCOMM '13}
   doi={10.1109/TLA.2014.7014534}}
 
 @ARTICLE{srv6,
-  author={Ventre, Pier Luigi and Salsano, Stefano and Polverini, Marco and Cianfrani, Antonio and Abdelsalam, Ahmed and Filsfils, Clarence and Camarillo, Pablo and Clad, Francois},
+  author={Ventre, Pier Luigi and others},
   journal={IEEE Communications Surveys and Tutorials}, 
   title={Segment Routing: A Comprehensive Survey of Research Activities, Standardization Efforts, and Implementation Results}, 
   year={2021},
@@ -67,11 +106,11 @@ series = {SIGCOMM '13}
   doi={10.1109/COMST.2020.3036826}}
 
 @article{p4,
-    author = {Bosshart, Pat and Daly, Dan and Gibb, Glen and Izzard, Martin and McKeown, Nick and Rexford, Jennifer and Schlesinger, Cole and Talayco, Dan and Vahdat, Amin and Varghese, George and Walker, David},
-    title = {P4: Programming Protocol-Independent Packet Processors},
+    author = {Bosshart, Pat and others},
+    title = {{P4: Programming Protocol-Independent Packet Processors}},
     year = {2014},
     issue_date = {July 2014},
-    publisher = {Association for Computing Machinery},
+    publisher = {ACM},
     address = {New York, NY, USA},
     volume = {44},
     number = {3},
@@ -91,19 +130,15 @@ series = {SIGCOMM '13}
 
 
 @inproceedings{james-imc,
-author = {L\'{e}as, Rapha\"{e}l and Iurman, Justin and Vyncke, \'{E}ric and Donnet, Benoit},
+author = {L\'{e}as, Rapha\"{e}l and others},
 title = {{Measuring IPv6 Extension Headers Survivability with James}},
 year = {2022},
 isbn = {9781450392594},
-address = {New York, NY, USA},
 url = {https://doi.org/10.1145/3517745.3563019},
 doi = {10.1145/3517745.3563019},
-abstract = {This extended abstract introduces James, a new tool for measuring how IPv6 Extension Headers (IPv6 EHs) are processed in the network. James sends specially crafted Paris traceroute packets between a set of controlled vantage points. Early measurement results show that IPv6 EHs may be dropped in the network, depending on their type and the size of the Extension Header.},
 booktitle = {Proceedings of the 22nd ACM Internet Measurement Conference},
 pages = {746–747},
 numpages = {2},
-location = {Nice, France},
-series = {IMC '22}
 }
 
 @techreport{rfc9268,
@@ -133,8 +168,8 @@ series = {IMC '22}
     month =     jul,
 }
 @INPROCEEDINGS{passive-threats,
-  author={Hendriks, Luuk and Velan, Petr and Schmidt, Ricardo de O. and de Boer, Pieter-Tjerk and Pras, Aiko},
-  booktitle={2017 Network Traffic Measurement and Analysis Conference (TMA)}, 
+  author={Hendriks, Luuk and others},
+  booktitle={Traffic Measurement and Analysis Conference}, 
   title={{Threats and surprises behind IPv6 extension headers}}, 
   year={2017},
   volume={},
@@ -146,23 +181,21 @@ series = {IMC '22}
 @techreport{elkins-v6ops-eh-deepdive-fw-01,
     number =    {draft-elkins-v6ops-eh-deepdive-fw-01},
     type =      {Internet-Draft},
-    institution =   {Internet Engineering Task Force},
-    publisher = {Internet Engineering Task Force},
+    institution =   {IETF},
+    publisher = {IETF},
     note =      {Work in Progress},
     url =       {https://datatracker.ietf.org/doc/draft-elkins-v6ops-eh-deepdive-fw/01/},
-        author =    {Nalini Elkins and michael ackermann and Dhruv Dhody},
+        author =    {Nalini Elkins and others},
     title =     {{Deep Dive into IPv6 Extension Header Testing}},
     pagetotal = 10,
     year =      2022,
     month =     oct,
-    day =       21,
-    abstract =  {IPv6 Extension Header testing is a complex area. Studies have shown varying results. This document proposes a methodology for isolating the location and reasons for IPv6 Extension Headers blockage. This document outlines the basic framework and set of documents which will follow.},
 }
 @techreport{ietf-6man-hbh-processing-06,
     number =    {draft-ietf-6man-hbh-processing-06},
     type =      {Internet-Draft},
-    institution =   {Internet Engineering Task Force},
-    publisher = {Internet Engineering Task Force},
+    institution =   {IETF},
+    publisher = {IETF},
     note =      {Work in Progress},
     url =       {https://datatracker.ietf.org/doc/draft-ietf-6man-hbh-processing/04/},
         author =    {Bob Hinden and Gorry Fairhurst},
@@ -170,19 +203,18 @@ series = {IMC '22}
     pagetotal = 15,
     year =      2023,
     month =     mar,
-    day =       11,
-    abstract =  {This document specifies procedures for how IPv6 Hop-by-Hop options are processed. It modifies the procedures specified in the IPv6 Protocol Specification (RFC8200) to make processing of IPv6 Hop-by- Hop options practical with the goal of making IPv6 Hop-by-Hop options useful to deploy and use in the Internet. When published, this document updates RFC8200 and RFC7045.},
+    day =       11
 }
 
 
 @techreport{ietf-v6ops-hbh-03,
     number =    {draft-ietf-v6ops-hbh-03},
     type =      {Internet-Draft},
-    institution =   {Internet Engineering Task Force},
-    publisher = {Internet Engineering Task Force},
+    institution =   {IETF},
+    publisher = {IETF},
     note =      {Work in Progress},
     url =       {https://datatracker.ietf.org/doc/draft-ietf-v6ops-hbh/03/},
-        author =    {Shuping Peng and Zhenbin Li and Chongfeng Xie and Zhuangzhuang Qin and Gyan Mishra},
+        author =    {Shuping Peng and others},
     title =     {{Operational Issues with Processing of the Hop-by-Hop Options Header}},
     pagetotal = 15,
     year =      2023,
@@ -193,8 +225,8 @@ series = {IMC '22}
 @techreport{ietf-6man-eh-limits-02,
     number =    {draft-ietf-6man-eh-limits-02},
     type =      {Internet-Draft},
-    institution =   {Internet Engineering Task Force},
-    publisher = {Internet Engineering Task Force},
+    institution =   {IETF},
+    publisher = {IETF},
     note =      {Work in Progress},
     url =       {https://datatracker.ietf.org/doc/draft-ietf-6man-eh-limits/01/},
         author =    {Tom Herbert},
@@ -207,39 +239,47 @@ series = {IMC '22}
 }
 
 
-@misc{nalini-iepg114,
-title = {{IETF 114: Performance and Diagnostic Metrics (PDM) Destination Option Testing Across the Internet}},
-author = " N. Elkins and M. Ackermann and A. Deshpande",
-year = "2022",
-month = "7",
+@misc{fernando-talk,
+title = {{IPv6 Security Mythbusting, UK IPv6 Council Enterprise workshop}},
+author = "F. Gont",
+year = "2023",
+month = "May",
 
 }
 
- @misc{apnic, title={IPv6 Extension headers revisited}, url={https://blog.apnic.net/2022/10/13/ipv6-extension-headers-revisited/}, journal={APNIC Blog}, publisher={APNIC}, author={Huston, Geoff}, year={2022}, month={Oct}} 
+
+@misc{nalini-iepg114,
+title = {{Performance and Diagnostic Metrics (PDM) Destination Option Testing Across the Internet}},
+author = " N. Elkins and others",
+year = "2022",
+month = "July",
+howpublished="IEPG, IETF 114"
+
+}
+
+ @misc{apnic, title={{IPv6 Extension headers revisited}}, url={https://blog.apnic.net/2022/10/13/ipv6-extension-headers-revisited/}, howpublished={APNIC Blog}, publisher={APNIC}, author={Huston, Geoff}, year={2022}, month={Oct}} 
 
 
  @techreport{ietf-ippm-ioam-ipv6-options-10,
     number =    {draft-ietf-ippm-ioam-ipv6-options-10},
-    type =      {Internet-Draft},
-    institution =   {Internet Engineering Task Force},
-    publisher = {Internet Engineering Task Force},
+    institution =   {IETF},
+    publisher = {{IETF}},
     note =      {Work in Progress},
+    type= {Internet-Draft},
     url =       {https://datatracker.ietf.org/doc/draft-ietf-ippm-ioam-ipv6-options/10/},
-        author =    {Shwetha Bhandari and Frank Brockners},
+    author =    {Shwetha Bhandari and Frank Brockners},
     title =     {{In-situ OAM IPv6 Options}},
     pagetotal = 11,
     year =      2023,
     month =     feb,
-    day =       28,
-    abstract =  {In-situ Operations, Administration, and Maintenance (IOAM) records operational and telemetry information in the packet while the packet traverses a path between two points in the network. This document outlines how IOAM data fields are encapsulated in IPv6.},
 }
 
 @article{v6adoption,
-author = {Czyz, Jakub and Allman, Mark and Zhang, Jing and Iekel-Johnson, Scott and Osterweil, Eric and Bailey, Michael},
-title = {Measuring IPv6 Adoption},
+author = {Czyz, Jakub and others},
+title = {{Measuring IPv6 Adoption}},
 year = {2014},
 issue_date = {October 2014},
-publisher = {Association for Computing Machinery},
+publisher = {ACM},
 address = {New York, NY, USA},
 volume = {44},
 number = {4},
@@ -255,8 +295,8 @@ numpages = {12},
 
 @ARTICLE{v6adoption_ton,
   author={Nikkhah, Mehdi and Guérin, Roch},
-  journal={IEEE/ACM Transactions on Networking}, 
-  title={Migrating the Internet to IPv6: An Exploration of the When and Why}, 
+  journal={IEEE Transactions on Networking}, 
+  title={{Migrating the Internet to IPv6: An Exploration of the When and Why}}, 
   year={2016},
   volume={24},
   number={4},
@@ -282,19 +322,18 @@ numpages = {12},
 
 @article{router-architecture,
 author = {Aweya, James},
-title = {IP router architectures: an overview},
+title = {{IP router architectures: an overview}},
 journal = {International Journal of Communication Systems},
 volume = {14},
 number = {5},
 pages = {447-475},
 doi = {https://doi.org/10.1002/dac.505},
-url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/dac.505},
 year = {2001}
 }
 
 @article{naagas2021deh,
-  title={DEH-DoSv6: A defendable security model against IPv6 extension headers denial of service attack},
-  author={Naagas, Marlon A and Malicdem, Alvin R and Palaoag, Thelma D},
+  title={{DEH-DoSv6: A defendable security model against IPv6 extension headers denial of service attack}},
+  author={Naagas, Marlon and others},
   journal={Bulletin of Electrical Engineering and Informatics},
   volume={10},
   number={1},
@@ -312,44 +351,68 @@ year = {2001}
 
 %
 
-@misc{rfc9343,
-    series =    {Request for Comments},
+@techreport{rfc9343,
     number =    9343,
-    howpublished =  {RFC 9343},
-    publisher = {RFC Editor},
-    doi =       {10.17487/RFC9343},
+    type = {{RFC}},
+    title =  {{IPv6 Application of the Alternate-Marking Method}},
+    institution = {IETF},
     url =       {https://www.rfc-editor.org/info/rfc9343},
-        author =    {Giuseppe Fioccola and Tianran Zhou and Mauro Cociglio and Fengwei Qin and Ran Pang},
-    title =     {{IPv6 Application of the Alternate-Marking Method}},
-    pagetotal = 20,
+    author =    {{Giuseppe Fioccola and others}},
     year =      2022,
-    month =     dec,
-    abstract =  {This document describes how the Alternate-Marking Method can be used as a passive performance measurement tool in an IPv6 domain. It defines an Extension Header Option to encode Alternate-Marking information in both the Hop-by-Hop Options Header and Destination Options Header.},
+    month =     dec
 }
 
 @article{bajpai2015lessons,
   title={{Lessons learned from using the RIPE Atlas platform for measurement research}},
-  author={Bajpai, Vaibhav and Eravuchira, Steffie Jacob and Sch{\"o}nw{\"a}lder, J{\"u}rgen},
-  journal={ACM SIGCOMM Computer Communication Review},
+  author={Bajpai, Vaibhav and others},
+  journal={ACM SIGCOMM Comput. Commun. Rev.},
   volume={45},
   number={3},
   pages={35--42},
   year={2015},
-  publisher={ACM New York, NY, USA}
+  publisher={ACM, NY, USA}
 }
 
 @inproceedings{learmonth2016pathspider,
   title={PATHspider: A tool for active measurement of path transparency},
-  author={Learmonth, Iain R and Trammell, Brian and Kuhlewind, Mirja and Fairhurst, Gorry},
-  booktitle={Proceedings of the 2016 Applied Networking Research Workshop},
+  author={Learmonth, Iain and others},
+  booktitle={Applied Networking Research Workshop},
   pages={62--64},
-  year={2016}
+  year={2016},
+  month={June}
 }
 
 @inproceedings{augustin2006avoiding,
   title={{Avoiding traceroute anomalies with Paris traceroute}},
-  author={Augustin, Brice and Cuvellier, Xavier and Orgogozo, Benjamin and Viger, Fabien and Friedman, Timur and Latapy, Matthieu and Magnien, Cl{\'e}mence and Teixeira, Renata},
-  booktitle={6th ACM SIGCOMM conference on Internet measurement},
+  author={Augustin, Brice and others},
+  booktitle={Proceedings of the 6th ACM Internet Measurement Conference},
   pages={153--158},
-  year={2006}
+  year={2006},
+  publisher={ACM, NY, USA}
+
+}
+
+@article{conti2020,
+title = {A robust multicast communication protocol for Low power and Lossy networks},
+journal = {Journal of Network and Computer Applications},
+volume = {164},
+pages = {102675},
+year = {2020},
+issn = {1084-8045},
+doi = {https://doi.org/10.1016/j.jnca.2020.102675},
+url = {https://www.sciencedirect.com/science/article/pii/S1084804520301491},
+author = {Mauro Conti and others},
+}
+
+@article{hauser2023,
+title = {A survey on data plane programming with P4: Fundamentals, advances, and applied research},
+journal = {Journal of Network and Computer Applications},
+volume = {212},
+pages = {103561},
+year = {2023},
+issn = {1084-8045},
+doi = {https://doi.org/10.1016/j.jnca.2022.103561},
+url = {https://www.sciencedirect.com/science/article/pii/S1084804522002028},
+author = {Frederik Hauser and others},
+
 }
