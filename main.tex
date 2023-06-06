@@ -509,13 +509,29 @@ This set of measurements indicates that packets including HBH and DST EH are for
 \section{Pathspider results} 
 \label{sec:pathspider-results}
 
-This section presents results obtained using PATHspider~\cite{learmonth2016pathspider}. In contrast to the Atlas measurements, these experiments use a limited number of vantage points, but target a large number of destinations. Where the destination is an authoritative NS, PATHSpider first performs a control measurement by sending a DNS query to the server using IPv6 packets not including an EH.
-PATHSpider then performs an end-to-end test, which measures server support for the destination. Although this requires test packets to traverse the path to the destination, this is not a path traversal measurement.
+This section presents the results obtained from the
+PATHspider~\cite{learmonth2016pathspider} dataset. The objective of these
+experiments is to observe the responses of DNS servers when probed with a DNS
+query, both with and without EHs. In essence, these tests concentrate on
+analyzing the behavior of endpoints rather than the behavior of routers along
+the path. The PathSpider dataset, in comparison to the Atlas dataset, employs a
+smaller number of vantage points but encompasses a larger number of target DNS
+servers. The list of DNS servers includes all the authoritative Name Servers (NS) of the Cisco
+Umbrella top 1M domains.
 
-The same measurement is then repeated including an 8 Byte PadN DST or HBH, and in each case a test is considered successful if the server replies to the DNS query. Where the destination is a web server, the test can only be done over TCP by sending a TCP SYN, and is considered successful if the server replies with a TCP SYN-ACK.
-This section reports on the end-to-end support, or the percentage of paths where test packets receive a response from the destination server.
+For each identified authoritative NS, PathSpider first performs a control
+measurement by sending a DNS query without EH.  This step ensures that the DNS
+server supports the intended destination. The test is then repeated, including
+a PadN DST or a HBH extension. The test is considered successful if the server
+responds to the DNS query both with and without EH. For web server
+destinations, PathSpider sends a TCP SYN packet and considers the test
+successful if the server replies with a SYN/ACK.
+
+%This section reports the end-to-end support percentage, indicating the paths
+%where test packets receive a response from the destination server.
 
 \begin{table} 
+\centering
 \begin{tabular}{c|cc|cc}
 \multicolumn{1}{l|}{} & \multicolumn{2}{c|}{DST Traversal} & \multicolumn{2}{c}{HBH Traversal} \\ \cline{2-5} 
 \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{TCP}       & UDP      & \multicolumn{1}{c|}{TCP}     & UDP     \\ \hline
@@ -530,6 +546,7 @@ Poland                & \multicolumn{1}{c|}{76.5}      & 76.8   & \multicolumn{1
 \end{table}
 
 \begin{table} 
+\centering
 \begin{tabular}{c|c|c|c}
            & \% of dataset &  DST Traversal & HBH Traversal\\
 \hline
@@ -552,10 +569,18 @@ Ionos      & 3                    & Yes                & No
 \subsection{End-to-end support}
 \label{subsec:e2esupport}
 
-Table~\ref{tbl:e2e_traversal} presents results to measure the end-to-end support for the authoritative NSes for the current Cisco Umbrella top 1M Domains list (Feb 2023).
+Table~\ref{tbl:e2e_traversal} show the percentages of successful test with the
+DST and HBH EHs for both TCP and UDP DNS queries across the whole set of
+authoritative NS for the current Cisco Umbrella top 1M Domains list (updated at
+February 2023).
 % ANA TODO - double check results^
 
-Similar to results previously presented for access networks, server support varies between the DST and HBH EHs: 69 to 80\% of the tested servers replied to packets when including DST, and up to 24.2\% do so when including HBH. The traversal does not vary with the transport (as seen for the access network results in the previous section). We attribute this to the lack of the type of local routers (i.e. CPEs) normally present in access networks. 
+Similar to results previously presented for access networks, server support
+varies between the DST and HBH EHs: 69 to 80\% of the tested servers replied to
+packets when including DST, and up to 24.2\% do so when including HBH. The
+traversal does not vary with the transport (as seen for the access network
+results in the previous section). We attribute this to the lack of the type of
+local routers (i.e. CPEs) normally present in access networks. 
 
 Only one measurement, from the Singapore vantage point, observed a 5\% difference based on transport in favour of TCP for both tested EHs.
 Finally, the table shows variations in support based on vantage point - support varies between 12 to 24.7\% for HBH, indicating fewer packets were dropped in transit networks in the latter case.
