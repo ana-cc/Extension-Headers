@@ -506,180 +506,331 @@ For 10 source-destination pairs in our dataset, some of the paths discovered for
 
 This set of measurements indicates that packets including HBH and DST EH are forwarded the same way as packets without EHs on only 13\% (in the case of HBH) and 60\% (in the case DST) of paths respectively, and that adding an EH can impact the function of load-balancing routers.
  
-\section{Pathspider results} 
+\section{PATHspider results} 
 \label{sec:pathspider-results}
+%~\cite{learmonth2016pathspider} 
 
-This section presents the results obtained from the
-PATHspider~\cite{learmonth2016pathspider} dataset. The objective of these
-experiments is to observe the responses of DNS servers when probed with a DNS
-query, both with and without EHs. In essence, these tests concentrate on
-analyzing the behavior of endpoints rather than the behavior of routers along
-the path. The PathSpider dataset, in comparison to the Atlas dataset, employs a
-smaller number of vantage points but encompasses a larger number of target DNS
-servers. The list of DNS servers includes all the authoritative Name Servers (NS) of the Cisco
-Umbrella top 1M domains.
+This section presents results from the analysis of the PATHspider dataset.
+These experiments measure the end-to-end traversal rates of EHs from a small
+pool of vantage points (5 worldwide locations) to a large number of web and
+DNS servers.  Unlike the results based on the Atlas dataset, in these
+experiments we require the server to process the packet containing the EH and
+reply to it. Thus, the traversal rate in these tests also account for the ability
+of the destination to process an EH.
 
-For each identified authoritative NS, PathSpider first performs a control
-measurement by sending a DNS query without EH.  This step ensures that the DNS
-server supports the intended destination. The test is then repeated, including
-a PadN DST or a HBH extension. The test is considered successful if the server
-responds to the DNS query both with and without EH. For web server
-destinations, PathSpider sends a TCP SYN packet and considers the test
-successful if the server replies with a SYN/ACK.
+The IPv6 addresses of the target web servers in these tests were collected by
+resolving the domain names in the Cisco Umbrella top 1M list. The IPv6
+addresses of the DNS servers, instead, were obtained considering the list of
+authoritative name servers for the same list of domains.
+
+A run of the experiment consisted in sending an IPv6 probe packet, either a DNS
+query over UDP to a DNS server or a TCP SYN to a web server, and observing the
+corresponding reply.  The test was marked as successul if a reply was received
+both with and without EHs, which indicates that an existing path supports a
+certain EHs.  The tested EHs were DST with a PadN Option and HBH.
 
 %This section reports the end-to-end support percentage, indicating the paths
 %where test packets receive a response from the destination server.
 
 \begin{table} 
 \centering
-\begin{tabular}{c|cc|cc}
-\multicolumn{1}{l|}{} & \multicolumn{2}{c|}{DST Traversal} & \multicolumn{2}{c}{HBH Traversal} \\ \cline{2-5} 
-\multicolumn{1}{l|}{} & \multicolumn{1}{c|}{TCP}       & UDP      & \multicolumn{1}{c|}{TCP}     & UDP     \\ \hline
-UK                    & \multicolumn{1}{c|}{69.1}      & 69.3    & \multicolumn{1}{c|}{12.5}    & 15.8  \\ \hline
-Canada                & \multicolumn{1}{c|}{76.3}      & 76     & \multicolumn{1}{c|}{23.3}    & 24.2  \\ \hline
-Australia             & \multicolumn{1}{c|}{72.5}        & 72.2      & \multicolumn{1}{c|}{17.7}    & 17.5  \\ \hline
-Singapore             & \multicolumn{1}{c|}{72.8}      & 72.7    & \multicolumn{1}{c|}{17.4}    & 17.4   \\ \hline
-Poland                & \multicolumn{1}{c|}{76.5}      & 76.8   & \multicolumn{1}{c|}{24.4}    & 24.7   
+\caption{Server support for DST and HBH EHs (Feb 2023). }
+\begin{tabular}{p{1.5cm}|cc|cc}
+\multicolumn{1}{l|}{} & \multicolumn{2}{p{2cm}|}{\centering DST support} 
+                      & \multicolumn{2}{p{2cm}}{\centering HBH support} \\ \cline{2-5} 
+\multicolumn{1}{l|}{} & \multicolumn{1}{c|}{TCP}   & UDP      & \multicolumn{1}{c|}{TCP}     & UDP   \\ \hline \hline
+UK                    & \multicolumn{1}{c|}{69.1}  & 69.3     & \multicolumn{1}{c|}{12.5}    & 15.8  \\ \hline
+Canada                & \multicolumn{1}{c|}{76.3}  & 76       & \multicolumn{1}{c|}{23.3}    & 24.2  \\ \hline
+Australia             & \multicolumn{1}{c|}{72.5}  & 72.2     & \multicolumn{1}{c|}{17.7}    & 17.5  \\ \hline
+Singapore             & \multicolumn{1}{c|}{72.8}  & 72.7     & \multicolumn{1}{c|}{17.4}    & 17.4  \\ \hline
+Poland                & \multicolumn{1}{c|}{76.5}  & 76.8     & \multicolumn{1}{c|}{24.4}    & 24.7   
 \end{tabular}
 \label{tbl:e2e_traversal}
-\caption{End-to-end traversal for an 8~B Pad N Option for packets including Dest and HBH EHs, from vantage points in 5 countries to n=18002 unique authoritative NSes in the Cisco Umbrella Top 1M, in 2787 different known ASes. All measurements were performed in February 2023, part of dataset P1. }
 \end{table}
+
 
 \begin{table} 
 \centering
-\begin{tabular}{c|c|c|c}
-           & \% of dataset &  DST Traversal & HBH Traversal\\
+\caption{Support for DST and HBH EH from DNS providers (Dec 2022).}
+\begin{tabular}{l|c|c|c}
+           & \% of dataset &  DST support & HBH support\\
+\hline \hline
+Cloudflare & 18   & Yes  & No                 \\
 \hline
-Cloudflare & 18                      & Yes                & No                 \\
+Amazon     & 11   & No   & No                 \\
 \hline
-Amazon     & 11                     & No                 & No                 \\
+Hetzner    & 3    & Yes  & No                 \\
 \hline
-Hetzner    & 3                     & Yes                & No                 \\
+Gandi      & 4    & No   & No                 \\
 \hline
-Gandi      & 4                     & No                 & No                 \\
-\hline
-Ionos      & 3                    & Yes                & No                
+Ionos      & 3    & Yes  & No                
 \end{tabular}
 \label{tbl:provider_support}
-\caption{End-server support for DST and HBH for major DNS server providers, n=99,987 paths, based on measurements from December 2022. 
 %Google does not support either EH, and is not listed in the table because it was only 30 destinations in the dataset.
-}
 \end{table}
+
+
+\begin{table} 
+\centering
+\caption{Support for DST and HBH from web providers (Dec 2022).}
+\begin{tabular}{l|c|c|c}
+           & \% of dataset & DST support & HBH support\\
+\hline
+\hline
+Amazon       & 52                     & Yes                & No                 \\
+\hline
+Cloudflare   & 23                     & Yes                & No                 \\
+\hline
+Akamai       & 2.7                    & Yes                & No                 \\
+\hline
+Google       & 2.3                    & No                 & No                 
+\end{tabular}
+\label{tbl:web_providers}
+\end{table}
+
 
 \subsection{End-to-end support}
 \label{subsec:e2esupport}
 
-Table~\ref{tbl:e2e_traversal} show the percentages of successful test with the
-DST and HBH EHs for both TCP and UDP DNS queries across the whole set of
-authoritative NS for the current Cisco Umbrella top 1M Domains list (updated at
-February 2023).
-% ANA TODO - double check results^
+Table~\ref{tbl:e2e_traversal} shows the percentages of successful tests with
+the DST and HBH EHs to DNS servers (UDP) and web servers (TCP).  Inline with
+previously presented data, support for DST EH is higher than HBH EH, with
+69-77\% of the tested servers replying when including DST compared to only
+12-25\% when including HBH.  However, unlike the results from Atlas database,
+these statitics are only marginally affected by the type of transport protocol
+(UDP or TCP).  The similarity between UDP and TCP can be attributed to the
+absence of specific router configurations, such as CPEs, along the path that
+are instead more prevalent in access networks.
 
-Similar to results previously presented for access networks, server support
-varies between the DST and HBH EHs: 69 to 80\% of the tested servers replied to
-packets when including DST, and up to 24.2\% do so when including HBH. The
-traversal does not vary with the transport (as seen for the access network
-results in the previous section). We attribute this to the lack of the type of
-local routers (i.e. CPEs) normally present in access networks. 
+% We find more than two-thirds of Amazon-hosted webservers respond to connections
+% by packets including DST, whereas Amazon-hosted DNS servers has no EH support. 
 
-Only one measurement, from the Singapore vantage point, observed a 5\% difference based on transport in favour of TCP for both tested EHs.
-Finally, the table shows variations in support based on vantage point - support varies between 12 to 24.7\% for HBH, indicating fewer packets were dropped in transit networks in the latter case.
+Interestingly, the table also reveals more significant variations of HBH EH
+success rates than DST EHs when servers were probed from different vantage
+points. For instance, the support for HBH EHs varies from 12\% from a UK
+location to almost 25\% from a Polish site.  This indicates that the transit
+network may have a greater impact on blocking HBH EHs than DST EHs.  
 
-However, around one third of destinations in the DNS dataset featured in Table~\ref{tbl:e2e_traversal} are hosted by a few major hosting companies (Cloudflare, Amazon, Gandi etc.), which employ network policies that filter packets that include EHs. 
+% Overall end-to-end EH
+% support for web servers in the dataset range from 72 and 78\% for DST EH and 2
+% to 3\% for HBH EH.
 
-End-server support for major DNS server providers are presented in Table~\ref{tbl:provider_support}. In Early December 2022, Cloudflare servers started responding to DNS queries sent with packets including DST, this results in a jump from 57\% to over 70\% for the dataset. If all major providers would enable support, this would bring the success of the E2E test to over 90\% for DST and 60\% for HBH for this dataset.
+%Only one measurement, from the Singapore vantage point, observed a 5\%
+%difference based on transport in favour of TCP for both tested EHs. 
 
-We tested end-to-end support for webservers in the Cisco Umbrella top 1M Domains list (232,350 unique IP addresses, Feb 2023) from the same destinations. This list of webservers is dominated by a few major hosting companies: around 52\% of destinations are hosted by Amazon Inc (AS16509); 23\% are hosted by Cloudflare (AS13335), and around 2.5\% each are hosted by Akamai Technologies and Google. We break down the supported EHs for each in Table~\ref{tbl:web_provider_support}. We find more than two-thrids of Amazon-hosted webservers respond to connections by packets including DST, in contrast to Amazon-hosted DNS servers, where none do. 
+It should be noted that the  majority of web servers and at least one-third of
+DNS servers in our traces were managed by a few major hosting companies, such
+as Cloudflare and Amazon.  Tables \ref{tbl:web_providers} and
+\ref{tbl:provider_support} provide a ranking of the hosting companies based on
+the share of hosted IP addresses for web and DNS servers, respectively. The
+tables also report the policy adopted by these companies regarding the
+propagation of packets including DST and HBH EHs.  
 
-Overall, we find end-to-end support for all tested webserver addresses to be between 72 and 78\% for  packets including DST and between 2-3\% for HBH.
+As we can see, large companies tend to enforce stringent filtering policies to
+packets that include EHs, possibly because they feel more exposed to potential
+risks of incorrect handling of EHs.  We found that the policies implemented by
+the larger hosting providers have indeed the greatest impact on the global
+traversal rate of packets with EH. 
+
+%Our analysis conducted in Feb 2023 found a total of 232,350 IP addresses, the
+%majority of which are provided by a few hosting companies: around 52\% of
+%destinations were hosted by Amazon Inc, 23\% by Cloudflare, and 2.5\% were
+%hosted by Akamai Technologies and Google.  Table~summarises the  EHs for each
+%hosting company.
+
+% In order to consider the influence of the major hosting providers,
+% Table~\ref{tbl:provider_support} presents the DST and HBH EH support for the
+% largest DNS providers in our dataset, along with their incidence.  
+
+To appreciate this impact, consider that in early December 2022, a change of
+policy in Cloudflare allowed servers to respond to DNS queries carrying EHs.
+As a result, there was a dataset-wide increase in success rate from 57\% to
+70\%, as currently reported in the table.  Extrapolating from this, if all the
+major providers were to enable support, we estimate that the success rate of
+this test would exceed 90\% for DST and 60\% for HBH.
 
 
-\begin{table} 
-\begin{tabular}{c|c|c|c}
-           & \% of dataset & DST Traversal & HBH Traversal\\
-\hline
-Amazon & 52                      & Yes                & No                 \\
-\hline
-Cloudflare     & 23                     & Yes                 & No                 \\
-\hline
-Akamai    & 2.7                     & Yes                & No                 \\
-\hline
-Google      & 2.3                     & No                 & No                 \\
-\
-\end{tabular}
-\label{tbl:web_provider_support}
-\caption{End-server support for the DST and HBH for major webserver providers, n=99,987 paths, based on measurements from December 2022. Google does not currently support either EH, and is not listed in the table because it only had 30 destinations in this dataset.
-}
-\end{table}
-
-
-\subsubsection{Option Type support}
-
-The next set of tests evaluate support for different Options. We repeated the DNS server experiment described above from one vantage point, but also varied the Option Type and Option Length fields. 
-Table~\ref{tbl:option_type_support} shows the support for different Option Types within the authoritative NSes for the current Cisco Top 1 Million Domains. We test a well-known Option, PadN~\cite{rfc2460}, against a recently-standardized one - MinPath MTU HBH~\cite{rfc9268}. We also test two experimental Options, 30 and 254~\cite{RFC4727}. The latter was chosen to test the traversal when the Option Type has its two most significant bits set.
-We find that the type of Option  does not affect traversal where the two most significant bits of the field are not set - with the same traversal percentage for PadN, minPMTU and the Experimental Option 30. Where the highest order bits are set, traversal is expected to be 0~\cite{RFC8200} - however, we  receive responses for 0.4\% of paths, indicating all routers on that path have ignored these bits.
-
-We tested an incorrectly set Option Length field. Any node parsing this EH field should validate the Option Length set for each Option, traversal is expected to be 0~\cite{RFC8200}; however we also find a small number of paths (0.5\%, or around 80 paths) where all routers on the path ignore this field.
+\subsection{Analysis of AS support for EHs}
 
 \begin{table}
-\begin{tabular}{l|l|l}
-Test                      & DST Traversal & HBH Traversal\\
+\caption{AS reachable by DST or HBH EHs (Dec 2022).}
+\begin{tabular}{l|c|c}
+Supported EH                & Paths per AS$>$=1 & Paths per AS$>$=10 \\
+\hline \hline
+Total  ASes                 & 2787              & 1606 \\
 \hline
-Pad N Option (1)          & 69.3           & 15.1          \\
-PMTU Discovery (48)       & 69.5           & 15.8          \\
-Experimental Option (254) & 0.4            & 0             \\
-Experimental Option (30)  & 69.4           & 15.1          \\
-Incorrect Option Length   & 0.5            & 0.05            
+%No DST support             & 212 (7.6\%)        & 110 (6.8\%)    \\
+DST on at least 1 path      & 2575 (92.4\%)     & 1496 (93.2\%)      \\
+DST on at least 50\% paths  & 2476 (88.8\%)     & 1437 (89.4\%)      \\ \hline
+%AS does not support HBH  & 1287 (46.2\%)  & 709 (44.1\%)            \\
+HBH on at least 1 path      & 1500 (53.8\%)      & 897 (55.9\%)      \\
+HBH on ar least 50\% paths  & 1037 (37.2\%)      & 580 (36.1\%)  
+\end{tabular}
+\label{tbl:as_pathspider}
+\end{table}
+
+If we consider the traversal rates of EHs in Autonomous Systems (ASes), the
+outlook is different.  Table~\ref{tbl:as_pathspider} reports the  number of
+ASes containing the target DNS servers that could be reached from at least a
+vantage point over at least a path and compares it with the total number of
+ASes (2nd column) discovered in the trace. To assess that this metric is valid
+across multiple paths to the AS, we also report the number of AS reachable over
+a least 10 paths (3rd column), and those that succeed in more than half of
+paths in both DST and HBH cases (3rd and 5th row, respectively).
+
+%Tablepresents the traversal
+%rates for the ASes targeted by PATHspider (2868 in total). 
+
+% from at least one of the vantage points.
+% a target server belonging to the AS probed f
+% The first column considers all destination ASes in the dataset, while the
+% second only looks at ASes that host 10 destination addresses or more. 
+
+It is worth noting that these estimates of the actual support of EHs in ASes
+are conservative, as the destination ASes that were not reachable from any
+vantage point may have been masked by upstream ASes dropping EHs.
+
+% alongside evidence that they support either the DST or HBH EH.  If at
+% least one reply is seen from an AS to one of our test packets from any of the
+% locations tested, we consider that AS supports the traversal of packets that
+% include the tested EH type. 
+
+These figures clearly highlight that transparent delivery of EHs is common
+among the majority of ASes: overall, about 90\% of ASes allow
+traversal of packets including an 8~B DST EH, and about half of ASes allow an
+8~B HBH EH.  When considering the ASes (1606) tested over 10 or more paths, the
+results vary little.  This suggest that DNS servers are more concentrated in
+ASes with stricter policies.
+
+The presented figures reduce when packets travel towards the destination
+through multiple ASes, suggesting that many packets that include an EH could be
+dropped well before reaching the destination AS. For DST, 3.4\% fewer ASes
+permit DST traversal on more than half the paths, whereas for HBH, the
+difference is 16.6\%. Again, this demonstrate the importance of the transit 
+network in supporting HBH EHs. 
+
+\subsection{Support for EH Options}
+
+\begin{table}[t]
+\centering 
+\caption{Support for EH Options in DNS queries.}
+\begin{tabular}{l|c|c}
+Test                      & DST support & HBH support\\
+\hline \hline
+Pad N Option (1)          & 69.3        & 15.1       \\
+PMTU Discovery (48)       & 69.5        & 15.8       \\
+Experimental Option (30)  & 69.4        & 15.1       \\
+Experimental Option (254) & 0.4         & 0          \\
+Incorrect Option Length   & 0.5         & 0.05            
 \end{tabular}
 \label{tbl:option_type_support}
-\caption{End-to-end support for different Option Types in the authoritative NSes for the Cisco Top 1 Million Domains, n=19052 unique IPv6 targets using a UDP transport (dataset P2).}
 \end{table}
+
+Additional measurements were conducted to determine whether the findings
+presented can be observed across other Options within EHs.  In particular, we
+evaluated the effect of the two higher ordered bits of the Option type
+that indicate how router should behave when the option is unknown.
+
+Table~\ref{tbl:option_type_support} shows the percentage of support for various
+Option types in tests towards DNS servers.  In addition to the already
+considered PadN Option, we tested the recently standardised MinPath MTU
+HBH~\cite{rfc9268}, and two experimental Options, namely 30 and
+254~\cite{RFC4727}.  The latter has been defined by IANA for testing purposes
+only, and it is expected to be discarded by all routers since the two most
+significant bits are set.  
+
+Results show that, if the two most significant bits are unset (i.e. Option type
+$\le 63$), the type of Option has no affect on the EH support as all the
+traversal rates are similar.  When the highest order bits are set, the
+traversal rate was expected to be zero~\cite{RFC8200}.  Instead, we receive
+responses in 0.4\% of paths, which means that these bis have been ignored by all
+routers on a small number of paths.
+
+Finally, we tested an incorrectly set Option Length field. Any node parsing
+this EH field should validate the Option Length and discard the
+packet~\cite{RFC8200}. However, we find found also in thi case a small number
+of paths (0.5\%) where all routers on the path ignore this field.
+
+\begin{table}[t]
+\centering
+\caption{Percentage of probes triggering ICMPs.}
+\label{tbl:icmp_support_dst}
+\begin{tabular}{l|p{0.04\textwidth}|
+p{0.03\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.025\textwidth}}
+                           &          & UK        & Can       & Aus    & Sgp          & Pol     \\
+\hline
+\hline
+{ICMP rcvd from local AS}  & {HBH DST} & {0 100}  & {0 51.6}    & {0 51.9}    & {0 51.9}    & {0 51.5}  \\
+\hline
+{ICMP recvd from other AS} & {HBH DST} & {72.8 0} & {52.5 0}    & {68.2 0}    & {69.2 0}    & {73  0}   \\
+\hline
+{ICMP rcvd \& packet frwd} & {HBH DST} & {0 0.52} & {0 0.48}    & {0 0.46}    & {0 0.24}    & {0 0.46}  \\
+\hline
+{ICMP not received}        & {HBH DST} & {27.2 0} & {47.5 48.4} & {31.8 48.1} & {30.8 48.1} & {27 48.5} 
+\end{tabular}
+\end{table}
+
+
+\subsection{ICMP Parameter Problem Messages}
+
+% When a packet includes a DST or HBH Option with the two MSBs set, a router
+% that does not recognise the Option should discard the packet returning an
+% ICMP \textit{Parameter Problem} message to the sender~\cite{RFC8200}. 
+% Results for DST and HBH are presented in Table~\ref{tbl:icmp_support_dst}.  
+
+When a router is unable to process an Option with the two MSBs set
+(option type $\ge 192$), it should discard the packet containing the Option and
+send back to the sender an ICMP "Parameter Problem" message~\cite{RFC8200}.
+
+This behaviour was indeed observed from the all the vantage points, where the
+first router on the path, the local router at the vantage point, returned an
+ICMP notification for 50 to 100\% of probes with a DST EH containing 
+Option 254 (Table~\ref{tbl:icmp_support_dst}).
+
+Since the local router is believed to have generated ICMP messages for all
+probes, percentages lower than 100\%  are attributed to ICMP rate-limiting
+filters present on the returning path.  The same ICMP rate-limiting effect was
+also observed on ICMP generated by other routers on the path in response to
+HBH EH with Option 254.
+
+Given that ICMP rate-limiting filters are widespread, we believe ICMPs
+are not a reliable indicator of whether a packet was dropped with an unknown
+Option that sets its two MSBs.  
+
+In a minority of cases, we encountered paths where packets were consistently
+forwarded regardless of the MSB settings, or instances where an ICMP message
+was generated while the packet was still being forwarded to the destination.
+This particular anomaly, which occurs in approximately 0.2-0.5\% of paths for
+packets containing DST, is indeed the most critical since it violates the
+fundamental principle of packet conservation and has the potential to create
+hazardous situations.  
+
+% This suggests that certain routers deviate from the RFC 8200 specifications,
+% indicating a lack of proper adherence to the standards.
 
 \subsubsection{ICMP Unreachable Messages}
 
-We also tested the generation of
-ICMP messages, by observing if an ICMP message is returned when a packet including a HBH is dropped by the path. ICMP unreachable messages are seen on 0.2\% of the tested NS paths. For packets including DST, ICMP unreachable messages are seen on 0.3 – 8.8\% of paths, depending on the vantage point.
-This suggests that ICMP messages cannot be used to ascertain whether a packet was dropped in transit due to the presence of Options.
-Upon closer inspection, we also find that for all destinations, ICMP unreachable messages can be received even when the test succeeds on up to 2\% of paths. These are exclusively received from routers in destination ASes and are a result of incorrect processing~\cite{RFC8200}.
-
-\subsubsection{ICMP Parameter Problem Messages}
-
-When a packet includes a Dest or HBH that sets the two MSBs, a router that does not understand this Option should discard the packet and return an ICMP Type 4 Parameter Problem message to the sender~\cite{RFC8200}. To examine whether this is prevalent in the Internet, we repeat the DNS server experiments using packets that include experimental Option Type 254. This Option has its two MSBs set and is unlikely to be understood by any router, and therefore we expect all sent packets to be dropped.
-
-Results for DST and HBH are described in Table~\ref{tbl:icmp_support_dst}.
-In the case of DST, for all vantage points tested, only the local router at the vantage point returns ICMP Type 4 Parameter Problem messages for the packet, as expected; the percentage of destinations for which the ICMP messages are received varies between 50-100\%. Because the local router always generates these messages, this variation may be due to ICMP rate-limiting. 
-The local router forwards packets that include HBH,  ICMP Type 4 Parameter Problem messages that are received from routers on the path or in the destination AS. The response rate is 52 - 73\%. 
-
-For both tested EHs, ICMP rate-limiting and filtering is evident. Therefore, ICMP is not a reliable indicator of whether a packet was dropped with an unknown Option that sets its two MSBs. We also find many of these paths continue to forward packets packets regardless of the setting for the 2 MSBs.
-
-In addition, between 0.2 and 0.5\% of paths for packets including DST, we also find that despite sending this ICMP message, the local router also forwards the packet to the destination and a response is  obtained from the server (the end-to-end test succeeds). This indicates some routers do not process packets as specified by~\cite{RFC8200}.
-
-\begin{table}
-\begin{tabular}{p{0.12\textwidth}|p{0.04\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.025\textwidth}}
-
-\centering
-
-                                           &             & UK        & Can       & Aus    & Sgp          & Pol     \\
-                                           \hline
-
-{\% ICMP received from vantage AS}        & {HBH DEST} & {0 100}  & {0 51.6}    & {0 51.9}    & {0 51.9}    & {0 51.5}  \\
-\hline
-{\% ICMP received from elsewhere on path}          & {HBH DEST} & {72.8 0} & {52.5 0}    & {68.2 0}    & {69.2 0}    & {73  0}    \\
-\hline
-
-{\% ICMP received, packet forwarded}          & {HBH DEST} & {0 0.52} & {0 0.48}    & {0 0.46}    & {0 0.24}    & {0 0.46}  \\
-\hline
-
-{\% ICMP message not received} & {HBH DEST} & {27.2 0} & {47.5 48.4} & {31.8 48.1} & {30.8 48.1} & {27 48.5} 
-\end{tabular}
-\caption{The set of behaviours for ICMP processing.}
-\label{tbl:icmp_support_dst}
-\end{table}
+We also tested the generation of ICMP messages, by observing if an ICMP message
+is returned when a packet including a HBH is dropped by the path. ICMP
+unreachable messages are seen on 0.2\% of the tested NS paths. For packets
+including DST, ICMP unreachable messages are seen on 0.3 – 8.8\% of paths,
+depending on the vantage point.  This suggests that ICMP messages cannot be
+used to ascertain whether a packet was dropped in transit due to the presence
+of Options.  Upon closer inspection, we also find that for all destinations,
+ICMP unreachable messages can be received even when the test succeeds on up to
+2\% of paths. These are exclusively received from routers in destination ASes
+and are a result of incorrect processing~\cite{RFC8200}.
 
 
-\subsubsection{Longitudinal analysis of support for EH}
+\subsection{Longitudinal analysis of support for EH}
 
-Table~\ref{tbl:longitudinal_support} presents a longitudinal set of measurements across the same set of domains collected over 3 years. Each domain was resolved prior to the measurement, resulting in a variation of the total unique IP addresses tested, presented in the last table row. The results show a decreasing trend in  support for HBH, with DST support remaining constant over time, until December 2022 when Cloudflare enabled support, as described in Subsection~\ref{subsec:e2esupport}.
+Table~\ref{tbl:longitudinal_support} presents a longitudinal set of
+measurements across the same set of domains collected over 3 years. Each domain
+was resolved prior to the measurement, resulting in a variation of the total
+unique IP addresses tested, presented in the last table row. The results show a
+decreasing trend in  support for HBH, with DST support remaining constant over
+time, until December 2022 when Cloudflare enabled support, as described in
+Subsection~\ref{subsec:e2esupport}.
 
 % Ana: verify total number of paths.
 \begin{table}
@@ -695,26 +846,7 @@ Unique IP addresses & 18296    & 19690    & 19553     & 20050
 \caption{End-to-end support for an 8~B Pad N Option for both Dest and HBH EHs, from one vantage point to the authoritative NSes for the same set of 1M domains, between Jan 2020 and Dec 2022 (dataset P1). The transport used was UDP.}
 \end{table}
 
-\subsection{AS analysis}
-
-Table~\ref{tbl:as_pathspider} presents ASes targeted by Pathspider (2868 in total) alongside evidence that they support either the DST or HBH EH.
-If at least one reply is seen from an AS to one of our test packets from any of the locations tested, we consider that AS supports the traversal of packets that include the tested EH type. Thus, at least 92.4\% of destination ASes allow traversal of packets including an 8~B DST EH, and more than half, 53.8\%, allow an 8~B HBH EH. This  reduces when the packet travles though multiple ASes towards the destination, revealing that many packets that include an EH are dropped in an AS that is different from the destination AS. For DST, 3.4\% fewer ASes permit DST traversal on more than half the paths, whereas for HBH, the difference is 16.6\%.
-When only considering the subset of ASes (1606) tested over 10 or more paths, the results vary little: at least 93.2\% of destination ASes allow traversal of packets including an 8~B DST EH, and more than half, 55.9\%, allow an 8~B HBH EH.
-
-    \begin{table}
-\begin{tabular}{p{0.195\textwidth}|p{0.11\textwidth}p{0.118\textwidth}}
-                                          & Paths per AS$>$=1 & Paths per AS$>$=10 \\ \cline{1-3} 
-Total number of ASes                      & 2787                                            & 1606                                            \\ \hline
-AS does not support DST               & 212 (7.6\%)                                     & 110 (6.8\%)                                     \\
-AS supports DST on 1 or more paths   & 2575 (92.4\%)                                   & 1496 (93.2\%)                                   \\
-AS supports DST on 50\% paths or more & 2476  (88.8\%)                                  & 1437 (89.4\%)                                   \\ \hline
-AS does not support HBH               & 1287 (46.2\%)                                   & 709 (44.1\%)                                    \\
-AS supports HBH on more than 1 path   & 1500 (53.8\%)                                   & 897 (55.9\%)                                    \\
-AS supports HBH on 50\% paths or more & 1037 (37.2\%)                                   & 580 (36.1\%)                                   
-\end{tabular}
-\label{tbl:as_pathspider}
-\caption{Number of ASes where DNS servers can be reached via packets including either Dest or HBH. The first column considers all destination ASes in the dataset, while the second only looks at ASes that host 10 destination addresses or more. Based on measurements from December 2022 (dataset P1).}
-\end{table}
+\newpage
 
 \section{Discussion} 
 \label{sec:discussion}
