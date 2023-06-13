@@ -515,7 +515,7 @@ These experiments measure the end-to-end traversal rates of EHs from a small
 pool of vantage points (5 worldwide locations) to a large number of web and
 DNS servers.  Unlike the results based on the Atlas dataset, in these
 experiments we require the server to process the packet containing the EH and
-reply to it. Thus, the traversal rate in these tests also account for the ability
+reply to it. Thus, the traversal rate in these tests also accounts for the ability
 of the destination to process an EH.
 
 The IPv6 addresses of the target web servers in these tests were collected by
@@ -526,8 +526,8 @@ authoritative name servers for the same list of domains.
 A run of the experiment consisted in sending an IPv6 probe packet, either a DNS
 query over UDP to a DNS server or a TCP SYN to a web server, and observing the
 corresponding reply.  The test was marked as successul if a reply was received
-both with and without EHs, which indicates that an existing path supports a
-certain EHs.  The tested EHs were DST with a PadN Option and HBH.
+both with and without EHs, which indicates that the path existed and could
+support a certain type of EHs.  The tested EHs were DST and HBH with a PadN Option.
 
 %This section reports the end-to-end support percentage, indicating the paths
 %where test packets receive a response from the destination server.
@@ -620,11 +620,11 @@ network may have a greater impact on blocking HBH EHs than DST EHs.
 
 It should be noted that the  majority of web servers and at least one-third of
 DNS servers in our traces were managed by a few major hosting companies, such
-as Cloudflare and Amazon.  Tables \ref{tbl:web_providers} and
-\ref{tbl:provider_support} provide a ranking of the hosting companies based on
-the share of hosted IP addresses for web and DNS servers, respectively. The
-tables also report the policy adopted by these companies regarding the
-propagation of packets including DST and HBH EHs.  
+as Cloudflare\texttrademark and Amazon\texttrademark.  Tables
+\ref{tbl:web_providers} and \ref{tbl:provider_support} provide a ranking of the
+hosting companies based on the share of hosted IP addresses for web and DNS
+servers, respectively. The tables also report the policy adopted by these
+companies regarding the propagation of packets including DST and HBH EHs.  
 
 As we can see, large companies tend to enforce stringent filtering policies to
 packets that include EHs, possibly because they feel more exposed to potential
@@ -643,11 +643,11 @@ traversal rate of packets with EH.
 % largest DNS providers in our dataset, along with their incidence.  
 
 To appreciate this impact, consider that in early December 2022, a change of
-policy in Cloudflare allowed servers to respond to DNS queries carrying EHs.
-As a result, there was a dataset-wide increase in success rate from 57\% to
-70\%, as currently reported in the table.  Extrapolating from this, if all the
-major providers were to enable support, we estimate that the success rate of
-this test would exceed 90\% for DST and 60\% for HBH.
+policy in Cloudflare\texttrademark allowed servers to respond to DNS queries
+carrying EHs.  As a result, there was a dataset-wide increase in success rate
+from 57\% to 70\%, as currently reported in the table.  Extrapolating from
+this, if all the major providers were to enable support, we estimate that the
+success rate of this test would exceed 90\% for DST and 60\% for HBH.
 
 
 \subsection{Analysis of AS support for EHs}
@@ -706,7 +706,7 @@ The presented figures reduce when packets travel towards the destination
 through multiple ASes, suggesting that many packets that include an EH could be
 dropped well before reaching the destination AS. For DST, 3.4\% fewer ASes
 permit DST traversal on more than half the paths, whereas for HBH, the
-difference is 16.6\%. Again, this demonstrate the importance of the transit 
+difference is 16.6\%. Again, this demonstrates the importance of the transit 
 network in supporting HBH EHs. 
 
 \subsection{Support for EH Options}
@@ -748,8 +748,8 @@ routers on a small number of paths.
 
 Finally, we tested an incorrectly set Option Length field. Any node parsing
 this EH field should validate the Option Length and discard the
-packet~\cite{RFC8200}. However, we find found also in thi case a small number
-of paths (0.5\%) where all routers on the path ignore this field.
+packet~\cite{RFC8200}. However, also in this canse, we found a small number of
+paths (0.5\%) where all routers on the path ignore the field.
 
 \begin{table}[t]
 \centering
@@ -778,75 +778,81 @@ p{0.03\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.03\textwidth}|p{0.025\
 % ICMP \textit{Parameter Problem} message to the sender~\cite{RFC8200}. 
 % Results for DST and HBH are presented in Table~\ref{tbl:icmp_support_dst}.  
 
-When a router is unable to process an Option with the two MSBs set
-(option type $\ge 192$), it should discard the packet containing the Option and
+According to RFC~8200, a router unable to process an Option with the two MSBs
+set (option type $\ge 192$) should discard the packet containing the Option and
 send back to the sender an ICMP "Parameter Problem" message~\cite{RFC8200}.
 
 This behaviour was indeed observed from the all the vantage points, where the
 first router on the path, the local router at the vantage point, returned an
-ICMP notification for 50 to 100\% of probes with a DST EH containing 
-Option 254 (Table~\ref{tbl:icmp_support_dst}).
+ICMP notification for a packet with a DST EH containing Option 254
+(Table~\ref{tbl:icmp_support_dst}).  However, only between 50 and 100\% of
+probes depending on the vantage point generated an ICMP.
 
-Since the local router is believed to have generated ICMP messages for all
-probes, percentages lower than 100\%  are attributed to ICMP rate-limiting
-filters present on the returning path.  The same ICMP rate-limiting effect was
-also observed on ICMP generated by other routers on the path in response to
-HBH EH with Option 254.
-
-Given that ICMP rate-limiting filters are widespread, we believe ICMPs
-are not a reliable indicator of whether a packet was dropped with an unknown
-Option that sets its two MSBs.  
+Since the local router is believed to have generated ICMP messages for all the
+probes, an ICMP return rate lower than 100\% should be attributed to some ICMP
+rate-limiting mechanism present on the return path.  The same ICMP
+rate-limiting effect was also observed on ICMP generated by other routers on
+the path in response to HBH EHs with Option 254.  The widespread presence of
+rate-limiting filters makes ICMP notifications not reliable an indicator of
+whether or not a packet was dropped due to an unknown Option.
 
 In a minority of cases, we encountered paths where packets were consistently
 forwarded regardless of the MSB settings, or instances where an ICMP message
 was generated while the packet was still being forwarded to the destination.
 This particular anomaly, which occurs in approximately 0.2-0.5\% of paths for
-packets containing DST, is indeed the most critical since it violates the
-fundamental principle of packet conservation and has the potential to create
-hazardous situations.  
+packets containing DST, is indeed the most critical since violates the
+principle of packet conservation and has the potential to create hazardous
+situations.  
 
 % This suggests that certain routers deviate from the RFC 8200 specifications,
 % indicating a lack of proper adherence to the standards.
 
-\subsubsection{ICMP Unreachable Messages}
+\subsection{ICMP Destination Unreachable}
 
-We also tested the generation of ICMP messages, by observing if an ICMP message
-is returned when a packet including a HBH is dropped by the path. ICMP
-unreachable messages are seen on 0.2\% of the tested NS paths. For packets
-including DST, ICMP unreachable messages are seen on 0.3 – 8.8\% of paths,
-depending on the vantage point.  This suggests that ICMP messages cannot be
-used to ascertain whether a packet was dropped in transit due to the presence
-of Options.  Upon closer inspection, we also find that for all destinations,
-ICMP unreachable messages can be received even when the test succeeds on up to
-2\% of paths. These are exclusively received from routers in destination ASes
-and are a result of incorrect processing~\cite{RFC8200}.
+When a packet is discarded due to an EH, an ICMP "Destination Unreachable"
+message could be generated back to the sender to notify a packet drop.  Our
+experiments shown, however, that this occurrence is uncommon.  For tests with
+HBH EH over paths towards DNS servers, ICMP "Destination Unreachable" messages
+are only seen on 0.2\% of the paths. For packets including DST, these messages
+are also infrequent, ranging from 0.3 to 8.8\% of paths depending on the vantage point. 
+
+The low return rate indicates that ICMP messages cannot reliably be used to
+determine if a packet was dropped in transit due to the presence of Options.
+In fact, upon closer inspection, we found that for all destinations, ICMP
+"Destination Unreachable" messages can be received in up to 2\% of the path
+even if the test succeeds. In this cases, ICMPs are exclusively received from
+routers in destination ASes and are a result of an incorrect processing of the
+EH~\cite{RFC8200}.
 
 
 \subsection{Longitudinal analysis of support for EH}
 
-Table~\ref{tbl:longitudinal_support} presents a longitudinal set of
-measurements across the same set of domains collected over 3 years. Each domain
-was resolved prior to the measurement, resulting in a variation of the total
-unique IP addresses tested, presented in the last table row. The results show a
-decreasing trend in  support for HBH, with DST support remaining constant over
-time, until December 2022 when Cloudflare enabled support, as described in
-Subsection~\ref{subsec:e2esupport}.
+Table~\ref{tbl:longitudinal_support} shows a longitudinal analysis measurements
+across the same set of domains collected over 3 years.  between Jan 2020 and
+Dec 2022.  The table shows the support for an 8~B Pad N Option for both DST and
+HBH EHs, from a single vantage point to the authoritative NSes for dataset P1.
+Each tested domain was resolved at the time of the measurement, resulting in a
+different pool of IP addresses in each session. 
+
+This data shows a decreasing trend in support of HBH. However, the DST support
+remained stable until December 2022 when Cloudflare\texttrademark enabled support on
+their network boosting the overall support, as previously
+mentioned~\ref{subsec:e2esupport}.
 
 % Ana: verify total number of paths.
 \begin{table}
-\begin{tabular}{l|l|l|l|l}
-                    & Jan 2020 & Jul 2020 & July 2022 & Dec 2022 \\
-\hline
-DST Traversal& 59.9\%   & 54.3\%   & 57.4\%    & 71.7\%   \\
-HBH Traversal & 25.7\%   & 23.8\%   & 16.4\%    & 11.9\%   \\
+\caption{Support for an PadN Option for DST and HBH EHs towards DNS servers.}
+\begin{tabular}{l|c|c|c|c}
+              & Jan 2020 & Jul 2020 & July 2022 & Dec 2022 \\
+\hline \hline
+DST support   & 59.9\%   & 54.3\%   & 57.4\%    & 71.7\%   \\
+HBH support   & 25.7\%   & 23.8\%   & 16.4\%    & 11.9\%   \\
 \hline
 Unique IP addresses & 18296    & 19690    & 19553     & 20050   
 \end{tabular}
 \label{tbl:longitudinal_support}
-\caption{End-to-end support for an 8~B Pad N Option for both Dest and HBH EHs, from one vantage point to the authoritative NSes for the same set of 1M domains, between Jan 2020 and Dec 2022 (dataset P1). The transport used was UDP.}
 \end{table}
 
-\newpage
 
 \section{Discussion} 
 \label{sec:discussion}
