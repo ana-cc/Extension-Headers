@@ -886,14 +886,14 @@ HBH on ar least 50\% paths  & 1037 (37.2\%)      & 580 (36.1\%)
 \label{tbl:as_pathspider}
 \end{table}
 
-If we consider the traversal rates of EHs in ASes, the outlook is different.
-Table~\ref{tbl:as_pathspider} reports the  number of ASes containing the target
-DNS servers that could be reached from at least a vantage point over at least a
-path and compares it with the total number of ASes (2nd column) discovered in
-the trace. To assess that this same metric is valid across multiple paths to
-the AS, we also report the number of AS reachable over a least 10 paths (3rd
-column), and those that succeed in more than half of paths in both DST and HBH
-cases (3rd and 5th row, respectively).
+If we consider the traversal rates of EHs in ASes rather than to individual
+servers, the outlook is different.  Table~\ref{tbl:as_pathspider} reports the
+number of ASes containing the target DNS servers that could be reached from at
+least a vantage point over at least a path and compares it with the total
+number of ASes (2nd column) discovered in the trace. To assess that this same
+metric is valid across multiple paths to the AS, we also report the number of
+AS reachable over a least 10 paths (3rd column), and those that succeed in more
+than half of paths in both DST and HBH cases (3rd and 5th row, respectively).
 
 %Tablepresents the traversal
 %rates for the ASes targeted by PATHspider (2868 in total). 
@@ -919,7 +919,7 @@ traversal of packets including an 8~B DST EH, and about half of ASes allow an
 results vary little.  This suggest that DNS servers are more concentrated in
 ASes with stricter policies.
 
-The presented figures reduce when packets travel towards the destination
+The figures reduce when packets travel to the destination
 through multiple ASes, suggesting that many packets that include an EH could be
 dropped well before reaching the destination AS. For DST, 3.4\% fewer ASes
 permit DST traversal on more than half the paths, whereas for HBH, the
@@ -952,7 +952,7 @@ Table~\ref{tbl:option_type_support} shows the percentage of support for various
 Option types in tests towards DNS servers.  In addition to the already
 considered PadN Option, we tested the recently standardised MinPath MTU
 HBH~\cite{rfc9268}, and two experimental Options, namely 30 and
-254~\cite{RFC4727}.  The latter has been defined by IANA for testing purposes
+254~\cite{RFC4727}.  The latter was defined by IANA for testing purposes
 only, and it is expected to be discarded by all routers since the two most
 significant bits are set.  
 
