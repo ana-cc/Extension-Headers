@@ -423,6 +423,7 @@ We also repeated this test in August 2023 using 32 Paris variations from a subse
 
 Datasets P1 and P2 were collected using
 PATHSpider~\cite{learmonth2016pathspider}, a path transparency testing tool. This works by performing consecutive tests to the same target server, one without and one including an EH.
+Compared to Atlas, which performs an in-depth hop-by-hop measurement, PATHspider does not test individual routers on the path. This instead allows for the rapid measurement of a very large number of target servers.
 %The selected targets are IPv6-enabled Domain Name System (DNS) servers, which
 %can be surveyed using both UDP and TCP, although we also present
 %traversal results for the Web servers underpinning the Cisco Umbrella top 1M
