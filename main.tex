@@ -739,9 +739,8 @@ TCP or the checksum in UDP.
 % various sets of fields for load-balancing~\cite{lb-classification}.
 
 Paris Traceroute was used from the vantage points under our control in Atlas to
-the destination in Zambia.  A  particular vantage point was included in this
-analysis only if consistently successful in previous tests.  In total, 766
-paths were measured.  Each run between a source and a destination pair was
+the second to last hop on the path to the Zambian destination. This destination was chosen based on measurements in dataset R1, as it saw the highest traversal rate for both HBH and DST EH packets. An Atlas vantage point was included in this test only if traversal from it was consistently successful in previous tests. In total, packets from 766
+source vantage points were measured.  Each run between a source and a destination was
 repeated using 16 Paris variations.  Each variation was repeated five
 times to eliminate the possibility that the forwarding path decision was
 influenced by an internal source of randomness within the router. 
@@ -778,7 +777,7 @@ results in~\cite{augustin2006avoiding}.  However, when DST EHs and HBH EHs are
 included, the median respectively reduces to 3.6 and 2.1 alternative paths.  
 % p-value is calculated assuming null hypothesis
 This variation in the number of identified paths suggests the inclusion of
-an EH influences the forwarding behaviour.  
+an EH influences the forwarding behaviour. 
 When analysing individual source-destination pairs, the
 measurement including a DST EH detected the same number of alternative paths as the baseline
 (within 1 path) in 60\% of cases and fewer paths (by less than 1) in 38\% of
@@ -786,7 +785,7 @@ the cases.  The measurement with HBH EHs observed 13.4\%
 of source-destination pairs with the same number of alternative paths and
 69.7\% discovering less alternative paths than the baseline.
 Results indicate that inclusion of an EH causes some routers to make
-different forwarding decisions.
+different forwarding decisions. In two cases, the inclusion of an EH caused the packet to be dropped on some of the alternative paths; these cases are not included in the analysis.
 
 Figure~\ref{fig:paths-fl} shows that that setting the FL increases the number of discovered alternative paths.
 This was measured using 32 Paris variations, and dividing the results depending on whether the Atlas vantage point sets a non-zero FL.
