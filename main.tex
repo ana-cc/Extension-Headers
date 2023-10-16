@@ -622,7 +622,7 @@ MSS Clamping inserts or modifies a TCP MSS Option into the TCP handshake segment
 to ``clamp" the MSS for a connection to a suitable value to compensate for
 network encapsulation overhead~\cite{custura-mtu}.  
 Given that Atlas probes do not send a TCP MSS Option by default, the
-presence of an TCP MSS Option at the destination indicates that an intermediate
+presence of a TCP MSS Option at the destination indicates that an intermediate
 router inserted it. This implies that a router had to parse the EH chain to analyse
 the complete TCP/IP header to identify the insertion point. If parsing
 fails, it is likely to result in a packet drop.
@@ -638,7 +638,7 @@ that drops occur more frequently on paths where MSS Clamping is used. This probl
 In some cases, the traversal for packets including HBH EHs is significantly
 affected by strict traffic aggregation policies enforced by network operators.
 Two notable examples in our traces are the Kazakhstan and Zambian networks.
-Both destinations are reachable from Atlas only through a single Border Gateway Protocol (BGP) peer. When using TCP, the majority of packets were dropped at the
+Both destinations are reachable only through a single Border Gateway Protocol (BGP) peer. When using TCP, the majority of packets were dropped at the
 second to last AS on their path (corresponding to the destination's only upstream AS).
 While the traversal to the destination's upstream AS shows a behaviour
 similar to other destinations (see Fig.~\ref{fig:traversal_pathologies}),
@@ -812,10 +812,10 @@ source-destination pairs, averaged over five measurement runs, each using 32 Par
 
 
 
-If the network selects different paths for flows containing EH packets, it
+If ECMP causes packets including an EH to travel on a different path, it
 becomes crucial to determine whether these path variations occur within a
-single AS where consistent configuration policies may be in
-place, or across multiple ASes. This distinction is important as it could
+single AS (where consistent configuration policies may be in
+place), or across multiple ASes. This distinction is important as it could
 result in packets including Options being processed by different sets of routers than packets
 without an EH. The implications of this depend on the specific type of
 extension being introduced. This effect
@@ -842,7 +842,7 @@ resolving the domain names in the Cisco Umbrella top 1M list. The IPv6
 addresses of the DNS servers were obtained considering the list of
 authoritative name servers for the same list of domains.
 Each experiment sent an IPv6 probe packet (either a DNS
-query over UDP or TCP to a DNS server, or a TCP SYN to a web server) with a PadN option included in either an HBH or DST EH. If server replies were observed to packets including an EH, the test then considers the path to successfully forward that EH.
+query over UDP or TCP to a DNS server, or a TCP SYN to a web server) with a PadN option included in either an HBH or DST EH. If server replies to packets including an EH were observed, the test then considers the path to successfully forward that EH.
 
 %This section reports the end-to-end support percentage, indicating the paths
 %where test packets receive a response from the destination server.
@@ -1092,7 +1092,7 @@ p{0.02\textwidth}|p{0.02\textwidth}|p{0.02\textwidth}|p{0.02\textwidth}|p{0.025\
 A router unable to process an option with a non-zero value
 for the action bits ought to return an ICMP message.
 Option type $\ge 192$ should cause the packet containing the Option to be discarded and
-return an ICMP "Parameter Problem" message~\cite{rfc8200} to the source.
+return an ICMP ``Parameter Problem" message~\cite{rfc8200} to the source.
 This expected behaviour was observed from all the vantage points. 
 
 The local router returned an ICMP message in response to a packet including Option 254 in a DST EH
@@ -1115,10 +1115,10 @@ routers in destination ASes and are a result of incorrect processing of the EH~\
 
 \subsection{ICMP Destination Unreachable}
 
-When a packet is discarded due to an EH, an ICMP "Destination Unreachable"
+When a packet is discarded due to an EH, an ICMP ``Destination Unreachable"
 message could be generated back to the sender, either from the destination or another router on the path.
 We found that for all destinations, an ICMP
-"Destination Unreachable" message is received only in up to 2\% of the paths
+``Destination Unreachable" message is received only in up to 2\% of the paths
 even if the test succeeds.  
 
 For tests including a
