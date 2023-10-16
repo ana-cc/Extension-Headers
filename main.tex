@@ -569,9 +569,7 @@ The difference in traversal between UDP and TCP can be attributed to the overall
 size of the transport header.  The combined header size of TCP (20B) and IPv6
 (40B) plus a 48B EH is 108B, while the combined header size of UDP (8B) and IPv6
 plus a 56B EH is 104B. 
-This is consistent with a router parsing buffer available of approximately 104B.
-%(a common buffer size of 128B also includes layer 2 header parsing).
-% https://www.cisco.com/c/dam/global/en_uk/products/switches/cisco_nexus_9300_ex_platform_switches_white_paper_uki.pdf
+This is consistent with available router parsing buffers of 128B, of which several bytes are reserved for parsing packet Layer 2 header information~\cite{apnic-buffers}~\cite{ietf-6man-eh-limits-04}.
 %(see similar conclusions in~\cite{james-imc}). 
 The size of the parsing buffer in currently deployed routers imposes a
 constraint on the current usability of a large IPv6 EH. This size could increase with time.
@@ -1175,7 +1173,7 @@ Some designs based on hardware and re-configurable logic have enabled the introd
 %Updates  have also been made to the IPv6 standard based on operational experience~\cite{RFC5722}~\cite{RFC6946}~\cite{RFC6564}~\cite{rfc8200}.
 %The recent interest in the deployment of HBH EHs  motivates a pathway to further innovation. 
 Many deployment scenarios for HBH Options are currently within a single domain, while some DST Options~\cite{ietf-ippm-ioam-ipv6-options-12} are being proposed for Internet-wide deployment.
-This is driving interest within the standards community~\cite{ietf-6man-HBH-processing-06, ietf-v6ops-hbh-03, ietf-6man-eh-limits-02} to develop new Options.
+This is driving interest within the standards community~\cite{ietf-6man-HBH-processing-06, ietf-v6ops-hbh-03, ietf-6man-eh-limits-04} to develop new Options.
 
 The next sections discuss the usability of EHs on Internet paths and the barriers to introducing new Options.
 
@@ -1183,7 +1181,7 @@ The next sections discuss the usability of EHs on Internet paths and the barrier
 \subsection{Usability of EH across Internet Paths}
   
 
-%EH processing has become a recent focus in the standards community~\cite {ietf-v6ops-hbh-03}, where new applications are emerging. Many current deployment scenarios are within a single domain. There are proposals to help facilitate an increase in support for EH~\cite{ietf-6man-HBH-processing-06, ietf-6man-eh-limits-02}. 
+%EH processing has become a recent focus in the standards community~\cite {ietf-v6ops-hbh-03}, where new applications are emerging. Many current deployment scenarios are within a single domain. There are proposals to help facilitate an increase in support for EH~\cite{ietf-6man-HBH-processing-06, ietf-6man-eh-limits-04}. 
 
 It is timely to ask what is the prospect for using EHs to extend IPv6 across adjacent domains, or across end-to-end Internet paths. This leads to a series of questions, which we seek to answer: 
 \subsubsection{What is the expected traversal for a packet including an EH sent on an Internet path?}
