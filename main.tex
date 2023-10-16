@@ -380,7 +380,7 @@ Test traversal of 8B Opts in access networks             & Traceroute       & R1
 \hline
 Test traversal and EH size in access networks           & Traceroute       & R2- Size           & Oct '22           & UDP TCP          \\
 \hline
-Test whether a consistent path is used 			& Paris Traceroute & R3- Paris        & Jan '23           & UDP               \\
+Test whether a consistent path is used 			& Paris Traceroute & R3- Paris        & Jan '23 Aug '23           & UDP               \\
 \hline
 Test traversal of Opts to the server edge              & PATHSpider       & P1- Server            & Jul '20- Jan '23 & UDP TCP          \\
 \hline
@@ -416,7 +416,7 @@ DST and HBH EHs. Each measurement was repeated 16 times (each identified by  a
 Paris ID), as in~\cite{augustin2006avoiding}. Each repetition varied the source
 port and, in the case of approximately half of the vantage points, the Flow Label (FL).
 Each set of 16 measurements was repeated five times.
-We also repeated this test several months later using 32 Paris variations from a subset of 430 vantage points for which the IPv6 FL setting behaviour was known.
+We also repeated this test in August 2023 using 32 Paris variations from a subset of approximately 380 vantage points for which the IPv6 FL setting behaviour was known.
 
 \subsection{Measuring server edge paths using PATHSpider}
 \label{sec:pathspider-methodology}
@@ -531,7 +531,7 @@ HBH and DST EHs, and using both UDP and TCP.
         \label{subfig:b}
     \end{subfigure}
     
-    \caption{Traversal for TCP and UDP packets including HBH and DST EHs of three different sizes from the Atlas vantage points to four target servers, with UDP transport.}
+    \caption{Traversal for packets including HBH and DST EHs of three different sizes from the Atlas vantage points to four target servers, with UDP transport.}
     \label{fig:main-size}
 \end{figure}
 
@@ -744,7 +744,7 @@ paths were measured.  Each run between a source and a destination pair was
 repeated using 16 Paris variations.  Each variation was repeated five
 times to eliminate the possibility that the forwarding path decision was
 influenced by an internal source of randomness within the router. 
-The test was subsequently repeated with 32 Paris variations from 430 Atlas vantage points, for which the FL setting behaviour was previously measured.
+The test was subsequently repeated with 32 Paris variations from approximately 380 Atlas vantage points, for which the FL setting behaviour was previously measured.
 
 %Six sets of measurements were run from all vantage points to the Zambian
 %destination, with each set of measurement using 16 Paris variations. We select
@@ -793,7 +793,7 @@ This was measured using 32 Paris variations, and dividing the results depending 
 \begin{figure}[t]
 \centering
   \includegraphics[width=0.3\textwidth]{FL.png}
-  \caption{Role of the FL in the number of paths detected by Paris Traceroute in ~430
+  \caption{Role of the FL in the number of paths detected by Paris Traceroute in ~380
 source-destination pairs, averaged over five measurement runs, each using 32 Paris variations (dataset R3). Setting the FL for a measurement results in between 0.5 and 1.2 additional paths detected on average by Paris Traceroute.}
   \label{fig:paths-fl}
 \end{figure}
