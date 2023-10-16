@@ -569,7 +569,7 @@ The difference in traversal between UDP and TCP can be attributed to the overall
 size of the transport header.  The combined header size of TCP (20B) and IPv6
 (40B) plus a 48B EH is 108B, while the combined header size of UDP (8B) and IPv6
 plus a 56B EH is 104B. 
-This is consistent with available router parsing buffers of 128B, of which several bytes are reserved for parsing packet Layer 2 header information~\cite{apnic-buffers}~\cite{ietf-6man-eh-limits-04}.
+This is consistent with a router parsing buffer of 128B, of which several bytes are reserved for parsing packet Layer 2 header information~\cite{apnic-buffers}~\cite{ietf-6man-eh-limits-04}.
 %(see similar conclusions in~\cite{james-imc}). 
 The size of the parsing buffer in currently deployed routers imposes a
 constraint on the current usability of a large IPv6 EH. This size could increase with time.
