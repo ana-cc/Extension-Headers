@@ -508,7 +508,7 @@ UDP, ranging from 8\% for the Zambian destination to 67\% for the destination in
 UK. The lower traversal for HBH EHs, and for packets carrying TCP
 was  linked to the
 behaviour and configuration of routers within access networks, more
-specifically ISP ingress routers.
+specifically ISP ingress routers (discussed in sub-sections~\ref{subsec: asdrop} and~\ref{subsec: pathologies}).
 
 The impact of EH size on the traversal is explored in dataset R2 - Size. Packets including an EH between 16B and 64B were sent from the ATLAS vantage points to 5 target destinations.  This experiment was repeated including
 HBH and DST EHs, and using both UDP and TCP. 
@@ -602,10 +602,11 @@ between ASes, where the drops could not be attributed to either AS.
 %xxxxxxxxxxxxxxxx
 %xxxxxxxxxxxxxxxx
 \subsection{Drops within the First AS}
+\label{subsec: asdrop}
 
 In many cases, a packet including a HBH EH sent from a vantage point is dropped within the AS where the vantage point is located, i.e. the initial AS (68\% UDP, 74\% TCP). Similarly, a notable fraction of packets including a DST EH (5\% UDP, 25\% TCP) are also dropped within the
 initial AS. This drop rate is irrespective of the destination.
-Most of these packets are dropped at the first router on the path. The type of transport has minimal influence on the traversal for HBH EHs (54\% UDP, 56\% TCP), but is significant for DST EHs (2.5\% UDP, 10\% TCP).
+Most of these packets are dropped by the first router on the path: for HBH EHs this drop rate is 54\% for UDP and 56\% for TCP (the type of transport has minimal influence), and 2.5\% for UDP, 10\% for TCP for DST EHs.
 Unlike for the overall path, this drop rate is not dependent on the EH length (Fig. \ref{fig:main-size}), and consistent traversal is seen across the entire range of tested EH sizes. We attribute this to the architecture of access routers, which in many cases is not constrained by the use of the parsing buffer in higher-speed router architectures.
 
 UDP packets that include a DST EH experience less than 1\% drop rate as they travel across further ASes.  This
