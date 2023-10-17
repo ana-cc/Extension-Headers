@@ -403,8 +403,8 @@ was defined in the original IPv6 standard to provide 8B alignment within an EH
 and is expected to be recognised by all IPv6 implementations.  
 
 Data was collected using both UDP and TCP transports from all 5464 vantage
-points, targeting seven globally distributed servers (dataset R1 - Access).  In a
-separate experiment (dataset R2 - Size), we varied the transport and EH size from 8B to 64B to four destinations, for a total of 129,585 measurements, with a mean of 4628 measurements ($\sigma$=351) for each combination of transport, size and EH. The variation in the number of measurements results from availability and connectivity of probes with time.
+points, targeting seven globally distributed servers (dataset R1 - Access). These targets are a mix of servers under the control of the authors and other Atlas vantage points, chosen for geographical diversity. In a
+separate experiment (dataset R2 - Size), we varied the transport and EH size from 8B to 64B to four destinations, for a total of 129,585 measurements, with a mean of 4628 measurements ($\sigma$=351) for each combination of transport, size and EH. The variation in the number of measurements results from availability and connectivity of probes with time. The time required for a complete set of tests (with two different transports, two types of EHs and several sizes) limited the total number of targets.
 
 
 Finally, we used Paris Traceroute~\cite{augustin2006avoiding} to detect
@@ -542,7 +542,7 @@ HBH and DST EHs, and using both UDP and TCP.
   \includegraphics[width=0.45\textwidth]{sizes.png}
   \caption{Traversal for packets including HBH and DST EHs from the Atlas
 vantage points to a target server in the JANET network (AS876), showing
-size of EH and split by transport.  }
+size of EH and split by transport. These results are compared to other destinations in Fig.~\red{fig:main-size}.}
 
   \label{fig:sizes}
 \end{figure}
