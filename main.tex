@@ -41,7 +41,7 @@
 \begin{abstract}
 % need to add a ref to the original 'is it still possible to extend tcp' paper somehow; 'the opposite of this paper is happening for v6'
 The IPv6 Hop-by-Hop Options and Destination Options Extension Headers have historically faced challenges in deployment due to a lack of router support coupled with concerns around potential for denial-of-service attacks. However, there has been a renewed interest within the standards community both in simplifying their processing, and in using these extension headers for new applications. 
-Through a wide-scale measurement campaign, we show that many autonomous systems in both access networks and the core of the Internet do permit the traversal of packets that include options, and that the path traversal currently depends on the type of network, size of the option and the transport protocol used, but does not usually depend on the type of included option. This is an encouraging result when considering the extensibility of IPv6. We show that packets including extension headers can also impact the function of load balancing network devices, and present evidence of equipment mis-configuration, noting that a different path to the same destination can result in a different traversal result. Finally, we outline the current deployment challenges and provide recommendations for how extension headers can utilise options to extend IPv6.
+Through a wide-scale measurement campaign, we show that many autonomous systems in both access networks and the core of the Internet do permit the traversal of packets that include options, and that the path traversal currently depends on the type of network, size of the option and the transport protocol used, but does not usually depend on the type of included option. This is an encouraging result when considering the extensibility of IPv6. We show that packets  that include an extension header can also impact the function of load balancing network devices, and present evidence of equipment mis-configuration, noting that a different path to the same destination can result in a different traversal result. Finally, we outline the current deployment challenges and provide recommendations for how extension headers can utilise options to extend IPv6.
 
 \end{abstract}
 
@@ -59,7 +59,7 @@ IPv6 EHs are already widely used to implement specific functions (e.g., end-to-e
 In this paper, we focus on network support for two EHs: the Destination Options (DST) header and the Hop-by-Hop Options (HBH) header~\cite{rfc9098}, as these are the primary means to introduce new end-to-end IPv6 functions.
 
 Recent presentations to the networking community have commented on the limited
-path traversal of packets including EHs and noted that network devices, such as
+path traversal of packets that include an EH and noted that network devices, such as
 firewalls, routers, load balancers and intrusion detection
 systems~\cite{nalini-iepg114, fernando-talk} do not properly handle packets
 that include an EH. 
@@ -76,7 +76,7 @@ of EHs.
 
 Additionally, some network administrators use firewalls to implement Access
 Control Lists (ACLs) at the outer edge of access and enterprise networks, that
-discard packets including an EH. This can mitigate security concerns, such as
+discard packets that include an EH. This can mitigate security concerns, such as
 bypassing security mechanisms or DoS
 attacks, but also results in packet drops.
 
@@ -147,7 +147,7 @@ length must be a multiple of 8 bytes to guarantee alignment in router memory.
 
 When an HBH EH is included, it must be placed immediately after the base
 header~\cite{rfc8200}.  Figure~\ref{fig:eh-format} shows the structure of an
-IPv6 packet including a base header followed by an HBH EH containing two
+IPv6 packet with a base header followed by an HBH EH containing two
 Options.  A Routing EH can follow the HBH EH to perform Source
 Routing (SRv6). SRv6 is used to ensure a path includes specified intermediate
 routers, usually within a single domain~\cite{srv6}~\cite{srperf}. 
@@ -160,9 +160,9 @@ SRv6 intermediate node, to permit updating the next destination in the SRv6 head
 
 A router can skip any Option that it does not recognise or it is not configured to
 support within an EH~\cite{rfc8200}.  The two most significant bits (MSB) of the Option Type field specify
-the action for an unrecognised header.  When set to ``00", a router should
+the action to be perfomed when encountering an unrecognised header.  When set to ``00", a router should
 ignore the Option and continue processing the header.  If any action bits are
-non-zero, the packet should be discarded.  When the action bits are ``01", an
+non-zero, the packet should be discarded.  This specifies that when the action bits are ``01", an
 ICMP message is returned to the sender. Similarly, if the bits are ``11",
 an ICMP message is returned, but only if the destination address of the original message was not multicast.
 Table~\ref{tbl:options} presents the currently standardised Options.  Note that
@@ -233,15 +233,15 @@ where both endpoints are under the control of the researcher concluding that
 only 8-9\% of paths in Internet can be traversed by an 8 Byte (8B) HBH EH, and 97\% of paths by an 8B DST EH.  These percentages decrease as the
 size of the EH increases~\cite{james-imc}. It should be noted, however, that 6
 of the 21 vantage points were hosted by Digital Ocean\texttrademark, an
-Internet service provider that drops packets including HBH EHs.
+Internet service provider that drops packets that include an HBH EH.
 
 An innovative measurement methodology was proposed by engineers in
 APNIC~\cite{apnic} to analyse end-to-end traversal for Fragmentation, HBH and
-DST EHs, by opening TCP connections using IPv6 packets
-with EHs from a crowd-sourced pool of clients and evaluating the number of
+DST EHs. This opens TCP connections using IPv6 packets
+including an EH from a crowd-sourced pool of clients and evaluates the number of
 successful connection establishments.  The results from 4M
 measurements/day from clients across the Internet found that 50\%  of
-attempts to open a connection including a DST EH were successful, but close to 0\%
+attempts to open a connection using a packet that includes a DST EH were successful, but close to 0\%
 when an HBH EH was included.  This test
 required both the Internet path to forward the EH and the endpoint to reply to
 a packet that included the tested EH. 
@@ -295,7 +295,7 @@ could be mitigated  by reducing the rate of packets entering the control plane.
 Awareness of this problem~\cite{passive-threats} motivated network
 operators to configure routers to discard packets that include an EH, in
 particular HBH EHs. The authors also noted that some routers discard packets
-including EHs due to flawed implementations of the IPv6
+that include an EH due to flawed implementations of the IPv6
 stack~\cite{passive-threats}.  Our paper aims to analyse whether this practice
 remains prevalent in the current Internet.
 
@@ -366,7 +366,7 @@ the slow-path, discarding packets is recommended.
 \section{Description of Datasets} 
 \label{sec:methodology}
 
-This paper employs a combination of tools and experiments, described in Table~\ref{tbl:datasets}, to explore how packets including an HBH or DST EH traverse Internet paths. 
+This paper employs a combination of tools and experiments, described in Table~\ref{tbl:datasets}, to explore how packets that include an HBH or DST EH traverse Internet paths. 
 Datasets R1-R3 are traceroute-based access network measurements from a distributed measurement platform, while  Datasets P1 and P2 describe end-to-end measurements to edge servers using PATHSpider~\cite{learmonth2016pathspider}.
 The methodology for each test is discussed in the next two subsections.
 
@@ -398,7 +398,7 @@ IPv6 vantage points (probes) across 644 unique AS Numbers (ASNs), spanning a
 range of commercial ISPs and R\&E access networks.  
 % The number of actual available probes fluctuates because it relies on
 % volunteer-run probes in edge networks that can be disconnected. 
-Traceroute packets were sent including a PadN Option inserted in DST and/or HBH EHs. This Option
+Traceroute packets were sent that include a PadN Option inserted in a DST and/or HBH EH. This Option
 was defined in the original IPv6 standard to provide 8B alignment within an EH
 and is expected to be recognised by all IPv6 implementations.  
 
@@ -422,14 +422,14 @@ We also repeated this test in August 2023 using 32 Paris variations from a subse
 \label{sec:pathspider-methodology}
 
 Datasets P1 and P2 were collected using
-PATHSpider~\cite{learmonth2016pathspider}, a path transparency testing tool. This works by performing consecutive tests to the same target server, one without and one including an EH.
+PATHSpider~\cite{learmonth2016pathspider}, a path transparency testing tool. This works by performing consecutive tests to the same target server, both with a packet that has no EH and one that includes an EH.
 Compared to Atlas, which performs an in-depth hop-by-hop measurement, PATHspider does not test individual routers on the path. This instead allows for the rapid measurement of a very large number of target servers.
 %The selected targets are IPv6-enabled Domain Name System (DNS) servers, which
 %can be surveyed using both UDP and TCP, although we also present
 %traversal results for the Web servers underpinning the Cisco Umbrella top 1M
 %domains.
 
-PATHSpider was used to survey Domain Name System (DNS) servers between 2019 and 2023, from a vantage point within the University of Aberdeen. DNS servers were initially chosen as they could be tested with both TCP and UDP.
+PATHSpider was used to survey Domain Name System (DNS) servers between 2019 and 2023. This used a vantage point within the University of Aberdeen. The set of DNS servers were initially chosen as they could be tested with both TCP and UDP.
 The experiment targeted IPv6 authoritative Name Servers (NS) for the
 then-current Alexa Top 1M domains list. This longitudinal measurement used a consistent set of domains to avoid list changes. Each domain was resolved, removing duplicates and unreachable addresses, resulting
 in 19,000 - 22,000 unique IPv6 addresses per test. These tests are included in dataset P1 - Server.
@@ -476,13 +476,13 @@ Table~\ref{tbl:options}.
 \begin{figure}[t]
 \centering
   \includegraphics[width=0.5\textwidth]{all_traversal.png}
-  \caption{Traversal for packets including HBH and DST, from Atlas vantage points to target servers located in seven different countries (dataset R1 - Access).}
+  \caption{Traversal for packets that include HBH and DST, from Atlas vantage points to target servers located in seven different countries (dataset R1 - Access).}
   \label{fig:countrybox}
 \end{figure}
 
 This section presents the results of experiments R1 through R3, conducted on the Atlas platform. 
 The primary performance metric analysed is path ``traversal".
-This is the proportion of paths where probe packets including an EH
+This is the proportion of paths where probe packets include an EH
 successfully reached the destination AS, represented as a percentage of the total paths tested.
 
 %This section also discusses the pathologies associated with the destinations.
@@ -511,7 +511,7 @@ was  linked to the
 behaviour and configuration of routers within access networks, more
 specifically ISP ingress routers (discussed in sub-sections~\ref{subsec: asdrop} and~\ref{subsec: pathologies}).
 
-The impact of EH size on the traversal is explored in dataset R2 - Size. Packets including an EH between 16B and 64B were sent from the ATLAS vantage points to 5 target destinations.  This experiment was repeated including
+The impact of EH size on the traversal is explored in dataset R2 - Size. Packets thatb inclyde an EH between 16B and 64B were sent from the ATLAS vantage points to 5 target destinations.  This experiment was repeated by including the
 HBH and DST EHs, and using both UDP and TCP. 
 
 %To understand the impact of total EH chain size on the traversal, we also tested EH chains of 16B and 48B in size that combined both types of EHs.
@@ -521,17 +521,17 @@ HBH and DST EHs, and using both UDP and TCP.
     
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{hbh-size-comparison.png}
-        %\caption{traversal for packets including HBH EHs of three different sizes from the Atlas vantage points to four target servers. }
+        %\caption{traversal for packets that include HBH EHs of three different sizes from the Atlas vantage points to four target servers. }
         \label{subfig:a}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{dst-size-comparison.png}
-        %\caption{traversal for packets including DST EHs of three different sizes from the Atlas vantage points to four target servers.}
+        %\caption{traversal for packets that include DST EHs of three different sizes from the Atlas vantage points to four target servers.}
         \label{subfig:b}
     \end{subfigure}
     
-    \caption{Traversal for packets including HBH and DST EHs of three different sizes from the Atlas vantage points to four target servers, with UDP transport.}
+    \caption{Traversal for packets that include HBH and DST EHs of three different sizes from the Atlas vantage points to four target servers, with UDP transport.}
     \label{fig:main-size}
 \end{figure}
 
@@ -540,7 +540,7 @@ HBH and DST EHs, and using both UDP and TCP.
 \begin{figure}[t]
 \centering
   \includegraphics[width=0.45\textwidth]{sizes.png}
-  \caption{Traversal for packets including HBH and DST EHs from the Atlas
+  \caption{Traversal for packets that include HBH and DST EHs from the Atlas
 vantage points to a target server in the JANET network (AS876), showing
 size of EH and split by transport. These results are compared to other destinations in Fig.~\red{fig:main-size}.}
 
@@ -551,8 +551,7 @@ size of EH and split by transport. These results are compared to other destinati
 
 The results depicted in Fig.~\ref{fig:main-size} and Fig.~\ref{fig:sizes} show the relationship between
 header size and traversal, demonstrating a decrease in the traversal as the header size increases between 16 and 64B. 
-Fig.~\ref{fig:sizes} only considers results where the test for a packet including an 8B EH successfully traversed the path.
-
+Fig.~\ref{fig:sizes} only considers results where the test successfully traversed the path using a packet that includes an 8B EH 
 
 Although the decrease is visible for all destinations, the amount of decrease is destination-dependent. These findings
 resemble results in~\cite{james-imc}, which examined traversal
@@ -599,13 +598,13 @@ Within this table, the columns labelled as $1^{st}$, $2^{nd}$, and $\infty$
 represent the traversal seen at the first, second, and last AS.
 Additionally, the columns labelled $1^{st}\rightarrow 2^{nd}$ and
 $2^{nd}\rightarrow 3^{rd}$ indicate the traversal
-between ASes, where the drops could not be attributed to either AS.
+between ASes, where packet drops could not be attributed to either AS.
 %xxxxxxxxxxxxxxxx
 %xxxxxxxxxxxxxxxx
 \subsection{Drops within the First AS}
 \label{subsec: asdrop}
 
-In many cases, a packet including a HBH EH sent from a vantage point is dropped within the AS where the vantage point is located, i.e. the initial AS (68\% UDP, 74\% TCP). Similarly, a notable fraction of packets including a DST EH (5\% UDP, 25\% TCP) are also dropped within the
+In many cases, a packet that includes a HBH EH sent from a vantage point is dropped within the AS where the vantage point is located, i.e. the initial AS (68\% UDP, 74\% TCP). Similarly, a notable fraction of packets thart include a DST EH (5\% UDP, 25\% TCP) are also dropped within the
 initial AS. This drop rate is irrespective of the destination.
 Most of these packets are dropped by the first router on the path: for HBH EHs this drop rate is 54\% for UDP and 56\% for TCP (the type of transport has minimal influence), and 2.5\% for UDP, 10\% for TCP for DST EHs.
 Unlike for the overall path, this drop rate is not dependent on the EH length (Fig. \ref{fig:main-size}), and consistent traversal is seen across the entire range of tested EH sizes. We attribute this to the architecture of access routers, which in many cases is not constrained by the use of the parsing buffer in higher-speed router architectures.
@@ -615,7 +614,7 @@ suggests that, once the first AS is traversed, these packets travel to the desti
 
 
 % These are paths where no traceroute response is received for
-% test packets including an EH, but responses are received for control packets with no
+% test packets that include an EH, but responses are received for control packets with no
 % EH.
 
 To further understand the impact of the initial AS, we examined the
@@ -630,14 +629,14 @@ the complete TCP/IP header to identify the insertion point. If parsing
 fails, it is likely to result in a packet drop.
 In our traces, we identified 853 paths to a UK destination where the TCP
 MSS option was inserted. Within
-this subset of paths, the traversal for a packet including an 8B HBH EH is 2.6\%, while for a DST EH, it is 48.1\%. The chi-square test (p-value$<10^{-43}$) provides
+this subset of paths, the traversal for a packet that includes an 8B HBH EH is 2.6\%, while for a DST EH, it is 48.1\%. The chi-square test (p-value$<10^{-43}$) provides
 strong evidence of a correlation between EH drops and MSS Clamping, indicating
 that drops occur more frequently on paths where MSS Clamping is used. This problem is expected to reduce when router protocol stacks are updated to parse EHs. 
 
 \subsection{Effects of Operational Configuration}
     \label{subsec: pathologies}
 
-In some cases, the traversal for packets including HBH EHs is significantly
+In some cases, the traversal for packets that include a HBH EH is significantly
 affected by strict traffic aggregation policies enforced by network operators.
 Two notable examples in our traces are the Kazakhstan and Zambian networks.
 Both destinations are reachable only through a single Border Gateway Protocol (BGP) peer. When using TCP, the majority of packets were dropped at the
@@ -714,7 +713,7 @@ Routers using ECMP (Equal Cost Multi Path) can distribute traffic on different p
 IPv6~\cite{lb-classification}. 
 Many routers allow the ECMP entropy to be calculated in different ways,
 e.g. using a simple hash calculation that relies on extracting the transport port from a fixed offset after the EH Chain. Some routers also utilise the IPv6 FL.
-If entropy is not extracted in a way that accounts for the EH chain, this could have two implications: it could mean that the packet including an EH for the purpose of measuring a path, or to detect a path property, will not observe the same path, or it could also potentially result in packet reordering within a flow. 
+If entropy is not extracted in a way that accounts for the EH chain, this could have two implications: it could mean that the packet that includes an EH to measure a path, or to detect a path property, will not observe the same path. This could also potentially result in packet reordering within a flow. 
 We therefore investigate using dataset R3 whether the inclusion of an EH and/or setting a non-zero FL results in any discernible change in forwarding behaviour compared to packets with no EH.
 
 % The objective of these test was to assess whether routers, which base their
@@ -771,7 +770,7 @@ the same 16 Paris variations (dataset R3).}
 Figure~\ref{fig:paths-detected} compares the distribution of the number of
 alternative paths discovered by Paris Traceroute including all
 source-destination pairs and Paris variations.  A baseline measurement using packets with no EH
-is compared with packets including DST and HBH EHs.  
+is compared with packets that include a DST and HBH EH.  
 A median of 4.7 alternative paths in the baseline experiment is consistent with the
 results in~\cite{augustin2006avoiding}.  However, when DST EHs and HBH EHs are
 included, the median respectively reduces to 3.6 and 2.1 alternative paths.  
@@ -779,7 +778,7 @@ included, the median respectively reduces to 3.6 and 2.1 alternative paths.
 This variation in the number of identified paths suggests the inclusion of
 an EH influences the forwarding behaviour. 
 When analysing individual source-destination pairs, the
-measurement including a DST EH detected the same number of alternative paths as the baseline
+measurement that included a DST EH detected the same number of alternative paths as the baseline
 (within 1 path) in 60\% of cases and fewer paths (by less than 1) in 38\% of
 the cases.  The measurement with HBH EHs observed 13.4\%
 of source-destination pairs with the same number of alternative paths and
@@ -813,11 +812,11 @@ source-destination pairs, averaged over five measurement runs, each using 32 Par
 
 
 
-If ECMP causes packets including an EH to travel on a different path, it
+If ECMP causes a packet that includes an EH to traverse a different path, it
 becomes crucial to determine whether these path variations occur within a
 single AS (where consistent configuration policies may be in
 place), or across multiple ASes. This distinction is important as it could
-result in packets including Options being processed by different sets of routers than packets
+result in packets that include Options being processed by different sets of routers than packets
 without an EH. The implications of this depend on the specific type of
 extension being introduced. This effect
 does not reduce the probability of transmission across the path.
@@ -835,7 +834,7 @@ This section presents results from the analysis of the PATHspider datasets (P1 a
 These experiments measure the end-to-end traversal from a small
 pool of vantage points (5 worldwide locations) to a large number of web and
 DNS servers.  Unlike for the Atlas dataset, these
-measurements require the server to process the packet including the EH and
+measurements require the server to process the packet That include the EH and
 reply.
 
 The IPv6 addresses of the target web servers in these tests were collected by
@@ -843,7 +842,7 @@ resolving the domain names in the Cisco Umbrella top 1M list. The IPv6
 addresses of the DNS servers were obtained considering the list of
 authoritative name servers for the same list of domains.
 Each experiment sent an IPv6 probe packet (either a DNS
-query over UDP or TCP to a DNS server, or a TCP SYN to a web server) with a PadN option included in either an HBH or DST EH. If server replies to packets including an EH were observed, the test then considers the path to successfully forward that EH.
+query over UDP or TCP to a DNS server, or a TCP SYN to a web server) with a PadN option included in either an HBH or DST EH. If server replies to packets that include an EH were observed, the test then considers the path to successfully forward that EH.
 
 %This section reports the end-to-end support percentage, indicating the paths
 %where test packets receive a response from the destination server.
@@ -943,7 +942,7 @@ as Cloudflare\texttrademark\ and Amazon\texttrademark.  Tables
 \ref{tbl:web_providers} and \ref{tbl:provider_support} provide a ranking of the
 hosting companies based on the share of hosted IP addresses for web and DNS
 servers, respectively. The tables also report the policy adopted by these
-companies regarding the propagation of packets including DST and HBH EHs.  
+companies regarding the propagation of packets that include a DST or HBH EH.  
 This is indicative of how large companies tend to enforce stringent filtering policies to
 packets that include EHs, possibly to reduce potential
 risks of incorrect handling of EHs.  We found that the policies implemented by
@@ -998,7 +997,7 @@ servers, the outlook is different. Because an AS may contain multiple target ser
 In its second column, Table~\ref{tbl:as_pathspider} reports the
 percentage of target ASes that could be reached over at least one path from any vantage point with the tested EH. Because each AS was measured over multiple paths, rows 3 and 5 also report the percentage where the test was successful for more than half of the tested paths.
 Only 1606 ASes out of 2787 were measured over more than 10 paths, and show results in-line with those obtained over the pool of all ASes. This is presented in the third column of Table~\ref{tbl:as_pathspider}.
-The estimates of the actual support of these EHs in ASes are conservative (under-estimated). A destination AS not reachable from any vantage point may well support them, but could be masked by an upstream AS that drops packets including EHs.
+The estimates of the actual support of these EHs in ASes are conservative (under-estimated). A destination AS not reachable from any vantage point may well support them, but could be masked by an upstream AS that drops packets that include an EH.
 
 %Tablepresents the traversal
 %rates for the ASes targeted by PATHspider (2868 in total). 
@@ -1015,7 +1014,7 @@ The estimates of the actual support of these EHs in ASes are conservative (under
 % include the tested EH type. 
 
 The results in Table~\ref{tbl:as_pathspider} highlight that 90\% of the tested ASes forward packets that include an  8B DST EH
- and about half forward packets including an
+ and about half forward packets that include an
 8B HBH EH.  There is little variation when considering the ASes (1606) tested over 10 or more paths.  
 %This suggest that DNS servers often have
 %ASes with stricter policies.
@@ -1053,7 +1052,7 @@ HBH~\cite{rfc9268}, and two experimental options: 30 and
 254~\cite{RFC4727}. Option 254 is specified for testing
 only, packets which include it are ought to be dropped by all routers, since both action bits are set and the option is unrecognized.
 
-The measurements show that if the action bits are zero (i.e. option type
+The measurements show that if the action bits are zero (i.e., option type
 $\le 63$), the type of option has no effect on EH traversal. When the action bits are set, the
 packet was expected to be dropped~\cite{rfc8200}.  Instead, we observe
 responses for 0.4\% of paths. This means that the action bits have been ignored by all
@@ -1096,17 +1095,17 @@ Option type $\ge 192$ should cause the packet containing the Option to be discar
 return an ICMP ``Parameter Problem" message~\cite{rfc8200} to the source.
 This expected behaviour was observed from all the vantage points. 
 
-The local router returned an ICMP message in response to a packet including Option 254 in a DST EH
+The local router returned an ICMP message in response to a packet that includes Option 254 in a DST EH
 (Table~\ref{tbl:icmp_support_dst}).  However, depending on the vantage point, only between 50 and 100\% of
 probes generated an ICMP message.
 Where messages were returned on fewer than 100\% of paths, this is attributed to ICMP
 rate-limiting.  ICMP rate-limiting was
-also observed from other routers in response to a packet including HBH Option 254. The widespread presence of
+also observed from other routers in response to a packet that includes HBH Option 254. The widespread presence of
 rate-limiting makes the use of ICMP notifications an unreliable
 indicator of packet drops due to an unknown Option.
 
 We encountered a few paths where packets were consistently
-forwarded regardless of the action bits, or instances (for 0.2-0.5\% of packets including DST) where an ICMP message
+forwarded regardless of the action bits, or instances (for 0.2-0.5\% of packets that include DST) where an ICMP message
 was generated and the packet was still forwarded to the destination. 
 On these paths, ICMP messages were exclusively received from
 routers in destination ASes and are a result of incorrect processing of the EH~\cite{rfc8200} by previous routers along the path.
@@ -1122,9 +1121,9 @@ We found that for all destinations, an ICMP
 ``Destination Unreachable" message is received only in up to 2\% of the paths
 even if the test succeeds.  
 
-For tests including a
+For tests packets that include a
 HBH EH over paths towards DNS servers, the ICMP messages
-are returned for 0.2\% of the paths. For packets including a DST EH, these messages
+are returned for 0.2\% of the paths. For a DST EH, these messages
 are also infrequent, ranging from 0.3 to 8.8\% of paths depending on the
 vantage point. 
 This indicates that ICMP messages cannot be reliably used to
@@ -1136,7 +1135,7 @@ determine whether a packet was dropped in transit due to the presence of Options
 
 Table~\ref{tbl:longitudinal_support} shows a longitudinal analysis
 across a set of domains collected over three years,  between Jan 2020 and
-Dec 2022.  The table shows successful traversal for a packet including an 8B Pad N Option for both DST and
+Dec 2022.  The table shows successful traversal for a packet that include an 8B Pad N Option for both DST and
 HBH EHs, from a single vantage point to the authoritative NSes for the dataset P1.
 Each tested domain was resolved at the time of the measurement, resulting in a
 different pool of IP addresses in each session. 
@@ -1160,7 +1159,7 @@ Unique IP addresses & 18296    & 19690    & 19553     & 20050
 \end{table}
 
 
-RFC 7872~\cite{RFC7872} describes the traversal to the authoritative name servers for the Alexa Top 1M domains in 2014. This observes that packets including an 8B PadN DST Option traverse paths to 78.6\% of server destinations and packets including an 8B PadN HBH Option traverse paths to 45.9\% of destinations. These results were measured from a single vantage point and are not grouped per AS, and therefore can only be compared with results in Table~\ref{tbl:longitudinal_support}. The comparison indicates a 5-9\% decrease in support for the DST EH and a 25-30\% decrease in support for the HBH EH, although we note this could reflect the choice of vantage point or changes within the top 1M domain list itself between 2014 and 2023.
+RFC 7872~\cite{RFC7872} describes the traversal to the authoritative name servers for the Alexa Top 1M domains in 2014. This observes that packets that include an 8B PadN DST Option traverse paths to 78.6\% of server destinations and packets that include an 8B PadN HBH Option traverse paths to 45.9\% of destinations. These results were measured from a single vantage point and are not grouped per AS, and therefore can only be compared with results in Table~\ref{tbl:longitudinal_support}. The comparison indicates a 5-9\% decrease in support for the DST EH and a 25-30\% decrease in support for the HBH EH, although we note this could reflect the choice of vantage point or changes within the top 1M domain list itself between 2014 and 2023.
 
 %This shows the decrease is due to drops within the destination AS.
 
@@ -1184,20 +1183,16 @@ The next sections discuss the usability of EHs on Internet paths and the barrier
 %EH processing has become a recent focus in the standards community~\cite {ietf-v6ops-hbh-03}, where new applications are emerging. Many current deployment scenarios are within a single domain. There are proposals to help facilitate an increase in support for EH~\cite{ietf-6man-HBH-processing-06, ietf-6man-eh-limits-04}. 
 
 It is timely to ask what is the prospect for using EHs to extend IPv6 across adjacent domains, or across end-to-end Internet paths. This leads to a series of questions, which we seek to answer: 
-\subsubsection{What is the expected traversal for a packet including an EH sent on an Internet path?}
-First, we consider whether we found evidence that a packet including an EH is expected to traverse an Internet path.
-We find that packets that include the DST EH traverse up to 96\% of Internet paths to the destination AS (Figure~\ref{fig:countrybox}), and that over 92\% of server edge ASes (Table~\ref{tbl:as_pathspider}) also support the DST EH. 
+\subsubsection{What is the expected traversal for a packet that include an EH sent on an Internet path?}
+First, we consider whether we found evidence that including an EH is expected to traverse an Internet path.
+We find that packets that include the DST EH do traverse up to 96\% of Internet paths to the destination AS (Figure~\ref{fig:countrybox}), and that over 92\% of server edge ASes (Table~\ref{tbl:as_pathspider}) also support the DST EH. 
 
-For HBH Options, we find that packets that include the HBH EH are supported on paths from some vantage points, although many are currently dropped by transit networks (Table~\ref{tbl:as_pathspider}) and by access networks (see Figure~\ref{fig:countrybox}). Mis-configuration or other network policies can also result in anomalies within transit networks, shown in Subsection~\ref{subsec: pathologies}. 
-
+We find that packets that include the HBH EH are supported on paths from some vantage points, although many are currently dropped by transit networks (Table~\ref{tbl:as_pathspider}) and by access networks (see Figure~\ref{fig:countrybox}). Mis-configuration or other network policies can also result in anomalies within transit networks, shown in Subsection~\ref{subsec: pathologies}. 
 Server-side, a longitudinal test to DNS servers reveals the support for the 8B PadN HBH Option has decreased over time when considering individual destinations (Table~\ref{tbl:longitudinal_support}), because servers have become centralised under a few ASes that do not yet support the HBH EH.  However, more than half of the tested ASes allow packets that include an HBH EH. 
 %This percentage diminishes to~37\% when considering whether traversal was successful on more than half the paths to the same destination AS, which confirms that transit networks can still present an obstacle to packets that include an HBH EH.
+In some cases, a low traversal was attributed to policy-based dropping. As noted, configured ACLs may be necessary in some networks today to protect routers (e.g., where EH processing cannot be disabled and leads to DoS vulnerabilities or undesirable side-effects~\cite{passive-threats}). In cases where this is not needed, we suggest that such a policy is not desirable, because it results in ossification that will obstruct new uses of EHs.
 
-In some cases, low traversal was attributed to policy-based dropping. Configured ACLs may be necessary in some networks today to protect routers (e.g. where EH processing cannot be disabled and leads to DoS vulnerabilities or undesirable side-effects~\cite{passive-threats}). In cases where this is not needed, such a policy is not desirable, because it results in ossification that will obstruct new uses of EHs.
-
-We also find that traversal reduces significantly for packets that include EHs (both DST and HBH) when a path contains access network routers that insert a TCP transport option. We infer that resolving this likely requires updates to these routers.
-
-
+We also find that traversal reduces significantly for packets that include EHs (both DST and HBH) when the path contains an access network router that inserts a TCP transport option. This is a barrier to deployment that we expect requires updates to these routers. This effect is not an obstacle when using other transport protocols.
 
 %Question 2: is there a limit to extension headers that prevents them from traversing certain Internet paths such as limiting length of the EH chain or a specific EH length? Would ? Is it different between HBH and DO?
 
@@ -1206,7 +1201,7 @@ We also find that traversal reduces significantly for packets that include EHs (
 \subsubsection{What size of Options can be safely used in the current Internet?}
 
 To understand if traversal can be improved by limiting the size of the total EH Chain, we explored using different size of EHs. We found that packets that include either a HBH or a DST EH that is less than 40B have a higher probability of traversing an access network path with a UDP transport, shown in Figure~\ref{fig:sizes}.
-This suggests that Internet forwarding is currently more consistent for packets that include an EH Chain of less than 40B.
+A smaller EH Chain currently provides more consistent Internet forwarding, and we suggest that until routers are updated, new options ought to be sized so that the packets include an EH Chain of less than 40B.
 
 % XXX A way forward is to skip the EH to facilitate HBH support and still protect the control plane
 
@@ -1225,38 +1220,39 @@ This suggests that Internet forwarding is currently more consistent for packets 
 
 %Question 5: If we find HBH don’t work everywhere then ….What is the opportunity for using a hop by hop extension header on some of the packets belonging to a flow? does this result in new forwarding pathologies? That is where the packets that include EHs take a different set of routers to the packets with no extension headers, and if so do they take a different network or do they simply follow a different path through the same operator network? Does this result in inconsistent loss? Is the option useful ?
 
-\subsubsection{What is the impact on forwarding behaviour of including an Option in a packet?}
+\subsubsection{What is the impact on forwarding behaviour when a packet includes an Option?}
 
-Results presented in Figure~\ref{fig:paths-detected} show that this inclusion can change a packet's forwarding path. We attribute this to the position of the EH between the IPv6 header and the transport header (which contains the transport port), suggesting some ECMP routers do not process or skip the header chain to find the actual port information, but might instead wrongly use a byte offset to the expected position of the source port.
+Results presented in Figure~\ref{fig:paths-detected} show that including an EH will in some cases change the packet's forwarding path. We attribute this to the position of the EH between the IPv6 header and the transport header (which contains the transport port). We infer some ECMP routers do not process (or skip) the header chain to find the actual port information, but might instead wrongly use a byte offset to the expected position of the source port, reducing the entropy available for selecting the path.
 
-Traffic flows that use a mix of packets that include an EH and packets without, must anticipate that these packets may not take the same Internet path.
-This motivates re-considering using the FL for load-balancing~\cite{RFC6437}. Modern operating systems set the FL on packets in the same traffic flow~\cite{os-fl}, and some routers already use it to perform load balancing~\cite{lb-classification}, and as shown in Fig.~\ref{fig:paths-fl}. However, the FL has also been used for other purposes~\cite{flow-label-approaches} including mobility and traffic engineering~\cite{traffic-eng}. We argue following the recommendation in~\cite{RFC6437} would mitigate the need to parse the entire IPv6 header chain by load-balancing devices, and would also prevent packet reordering, enabling new use-cases. 
+Traffic flows that use a mix of packets that include an EH and packets without, must anticipate that these packets might not take the same Internet path.
+This motivates re-considering use of the FL for load-balancing~\cite{RFC6437}. We note that modern operating systems set the FL on packets belonging to a traffic flow~\cite{os-fl}, and some routers do already use this to perform load balancing~\cite{lb-classification}, as shown in Fig.~\ref{fig:paths-fl}. However, the FL has also been used for other purposes~\cite{flow-label-approaches} including mobility and traffic engineering~\cite{traffic-eng}. We argue, following the recommendation in~\cite{RFC6437}, that using the FL for entropy in load-balancing devices would mitigate the need to parse the entire IPv6 header chain and would also prevent packet reordering. This will enable new use-cases for EH.
 
 
 \subsubsection{Can new Options be defined and used across the Internet?}
-Our  data  shows that packets including DST can already traverse many paths both across the Internet, and at the server and network edge. 
-We find that traversal does not depend on the type of Option  (see Table~\ref{tbl:option_type_support}). This is important because it suggests a new Option can be defined and then used on any path that allows EH processing. 
-As the functionality to process new HBH Options needs to be implemented in routers, we suggest it is unlikely that all routers on an Internet path will support a specific HBH Option. Therefore, we recommend that any functions that use an Option need to be designed to be robust to routers skipping HBH processing (e.g., the MinPMTU  Option~\cite{rfc9268,rfc9343}).
+Our  data  shows that packets that include a DST can already traverse many paths both across the Internet, and at the server and network edge. 
+This traversal does not depend on the type of Option (see Table~\ref{tbl:option_type_support}), which is important because it suggests that IPv6 an be extended by defining new Options that can be used on any path that allows EH processing. 
+
+The functionality to process new HBH Options needs to be implemented in routers, therefore it is unlikely that all routers on an Internet path will support any specific new HBH Option. We recommend that any functions that use an Option need to be designed to be robust to routers skipping HBH processing (e.g., as described in the MinPMTU  Option~\cite{rfc9268,rfc9343}).
 
 %Who sets the flow label???
 
 \subsection{Designing and Deploying New Options}
 
-We suggest it is possible to incrementally extend IPv6 by only utilising an EH when a path is found to forward it,
-suggesting a method similar to ~\cite{rfc9268}:
-An application can be designed to first send a test packet including an EH with the required Option, or combination of Options, and not send additional packets that include this Option until the test packet is acknowledged. The process of sending packets both with and without a header to discover whether a path can support that specific header is sometimes called ``racing" (e.g., transport protocol racing is explained in~\cite{ietf-taps-arch-18}; this resembles ``A/B protocol feature testing", as used in PATHSpider~\cite{learmonth2016pathspider}). Racing this feature could be implemented after connection establishment, which would reduce the interaction with other racing processes that setup the connection.
+We assert that  it is possible to incrementally extend IPv6 by only utilising an EH when a path is found to forward it,
+using a method similar to ~\cite{rfc9268}:
+An application can be designed to first send a test packet that include an EH with an Option, or combination of Options, and not send additional packets that include this Option until this test packet is acknowledged. The process of sending packets both with and without a header to discover whether a path can support that specific header is sometimes called ``racing" (e.g., transport protocol racing is explained in~\cite{ietf-taps-arch-18}; this resembles ``A/B protocol feature testing", as used in PATHSpider~\cite{learmonth2016pathspider}). Our proposed racing is performed after connection setup,  this feature could be implemented after establishment, in contrast to methods that race the IP protocol version or choice of transport protocol. 
 
-Our results show that for up to three-quarters of access networks, the first AS on the path will drop packets including an HBH Option (Table~\ref{tbl:uk_as1}). In this case, racing would not find a path where this EH is supported. However, on the remaining ~1335 access networks, racing would discover support on between 31\% and 66\% of paths.
+Our results show that for up to three-quarters of current access networks, the first AS on the path will drop packets that include an HBH Option (Table~\ref{tbl:uk_as1}). In this case, racing would  not find support for EH on the path. However, on the remaining ~1335 access networks, racing would discover support on between 31\% and 66\% of paths. Use of racing would allow new extensions to opportunistically take advantage of any support as networks evolve.
 
-This method could also be used to extend the use of EHs that are currently restricted to controlled domains (e.g., within an AS), such as~\cite{rfc8250}~\cite{ietf-ippm-ioam-ipv6-options-12}, across consecutive multiple domains.
-Since the set of routers forming a path can change with time, this discovery process ought to be repeated from time-to-time. 
+This method could also be used to extend the use of the EHs that are currently restricted to controlled domains (e.g., within an AS), such as~\cite{rfc8250}~\cite{ietf-ippm-ioam-ipv6-options-12}, enabling their use across consecutive multiple domains.
+Since the set of routers forming a path can change with time, the design of the discovery process ought to repeat the racing from time-to-time. 
 
 \subsubsection{ How useful is ICMP message processing for EH?}
 
-Since~\cite{rfc2460}, there have been important changes in the way that EHs are used. Modern routers only process these when support is explicitly configured, which diminishes the usefulness of the ICMP messages generated when an EH cannot be processed. 
+Since~\cite{rfc2460}, we observe there are important changes in the way that EHs are being  used. Modern routers only process an EH when support is explicitly configured. This has the effect of diminishing the usefulness of any ICMP messages generated when an EH cannot be processed. 
 %We also note that ICMP messages are often not delivered across paths, and therefore an endpoint can't rely on ICMP messages to infer whether functions are supported.
-We find some routers which (correctly) send an ICMP message in response to a packet including a DST Option with its action bits set, but nevertheless forward the packet. We also find that packets which include an HBH Option with both action bits set are commonly forwarded without sending an ICMP message. When considering whether or not a new Option needs to set its action bits, protocol designers should take into account that ICMP does not provide a reliable mechanism for indicating whether a function is supported by the path.
-It can thus be expected that new Options might utilise the 00 value for the action bits.
+We also find some routers which (correctly) send an ICMP message in response to a packet that includes a DST Option with its action bits set, but nevertheless incorrectly forward the packet. We also find that packets which include an HBH Option with both action bits set are commonly forwarded without sending an ICMP message. When considering whether or not a new Option needs to set these action bits, protocol designers need to take into account that ICMP does not provide a reliable mechanism for indicating whether a function is supported by the path.
+It is therefore expected that future Options will set a 00 value for the action bits.
 
 %and instead advocate a happy eyeballs approach to race packets including and without EH.
 %When we consider inclusion of an EH, we conclude that successful Internet traversal needs to take into account the whether the path is in an access or server edge network.
@@ -1267,19 +1263,21 @@ It can thus be expected that new Options might utilise the 00 value for the acti
 \section{Conclusion}
 \label{sec:conclusion}
 
-This paper presents novel results on the traversal of packets that include an HBH or DST EH across Internet paths, seeking to determine whether these EHs can be used to extend IPv6. It is the first detailed study of treatment by the routers along an IPv6 path, considering both access and server edge networks.
+This paper presents an extensive measure campaign and provides novel results indicating the traversal across Internet paths of packets that include either a HBH or a DST EH. It is the first detailed study of treatment by the routers along an IPv6 path, considering both access and server edge networks. These results are used to understand whether EHs can be used to extend IPv6.
 
-The successful reception across an IPv6 path can currently depend on the type of included EH, its size, and on the transport protocol used. This is
+The results indicate that successful reception across an IPv6 path can currently depend on the type of included EH, its size, and on the transport protocol used. This traversal is
 strongly influenced by the type of network at the source and destination.
 %Results are therefore presented from a range of vantage points.
 %These results demonstrate that if the EH chain is currently limited in size (e.g., less than 40B), packets including a DST EH can traverse as many as
 %95\% of a diverse set of Internet paths. While packet that include an HBH EH only traverse a narrow set of paths. They often fail to traverse the local access network, although in some cases they are dropped by an AS further along the path. When we characterise whether packets traverse an AS and exclude operator policies in access and transit networks, we find many ASes do forward packets that include this type of EH.
-The inclusion of an EH in a packet can impact the set of forwarding paths when network layer load-balancing is used, although our results show this can be mitigated by setting the FL.
+We also observed that the inclusion of an EH in a packet can impact the set of forwarding paths when the network layer performs load-balancing, although we assert that this can be mitigated by senders setting and ECMP routers using the FL.
 %This could be eliminated by utilising the IPv6 FL, or ensuring that routers using ECMP are able to traverse the entire IPv6 header chain. The implications of this will depend on the type of extension being introduced. Importantly, this effect did not reduce the probability of successful transmission across the path.
 
-The results suggest there are opportunities to use the IPv6 HBH and DST EHs beyond a single controlled domain, with the expectation that applications incrementally utilise new features using these EHs. 
+The results show there are opportunities to use the IPv6 HBH and DST EHs beyond a single controlled domain, with the expectation that applications incrementally utilise new features using these EHs. 
 
-We provide recommendations for the design of new extensions using Options. These need to consider that not all routers process EHs and that some paths drop packets that include EHs. To overcome these challenges, we motivate the use of racing to facilitate incremental deployment to enable new IPv6 functionality (e.g., to improve support for larger packet sizes). Similarly, we suggest that methods currently utilised in controlled domains could in future be used to extend IPv6 across multiple domains.
+Similarly, the results show that existing methods currently utilised in controlled domains could in future be used to extend IPv6 across multiple domains.
+
+The paper finally provides recommendations for the design of new IPv6 extensions using Options. New designs need to be aware that not all routers process EHs and that some paths will drop packets that include EHs. To overcome these challenges, we motivate the use of racing, which will facilitate incremental deployment that can enable new IPv6 functionality. 
 
 \section*{Acknowledgements}
 
